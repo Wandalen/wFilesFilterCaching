@@ -1,7 +1,7 @@
 if( typeof module !== 'undefined' )
 {
   require( 'wTools' )
-  require( '../staging/amid/file/Files.ss' )
+  require( '../staging/amid/file/filter/Caching.s' )
 }
 
 var _ = wTools;

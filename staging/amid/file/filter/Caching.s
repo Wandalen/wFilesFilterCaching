@@ -5,7 +5,8 @@
 if( typeof module !== 'undefined' )
 {
 
-  require( '../aprovider/Abstract.s' );
+  require( 'wTools' );
+  require( 'wFiles' );
 
 }
 

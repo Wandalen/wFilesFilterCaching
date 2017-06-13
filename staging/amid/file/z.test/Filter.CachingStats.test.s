@@ -5,7 +5,7 @@ var isBrowser = true;
 if( typeof module !== 'undefined' )
 {
   isBrowser = false;
-  require( '../FileMid.s' );
+  require( '../filter/Caching.s' );
 
   var _ = wTools;
 
