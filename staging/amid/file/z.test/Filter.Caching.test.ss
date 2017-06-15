@@ -4,7 +4,7 @@
 
 if( typeof module !== 'undefined' )
 {
-  require( '../FileMid.s' );
+  require( '../filter/Caching.s' );
 
   var _ = wTools;
 

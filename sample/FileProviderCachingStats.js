@@ -1,8 +1,7 @@
 if( typeof module !== 'undefined' )
 {
   require( 'wTools' )
-  require( '../staging/amid/file/FileBase.s' )
-  require( '../staging/amid/file/FileMid.s' )
+  require( '../staging/amid/file/filter/Caching.s' )
 }
 
 var _ = wTools;
@@ -15,9 +14,9 @@ var filePath = _.pathJoin( dir, 'file.txt' );
 
 /* get stat for current dir and cache them */
 
-// var fileStatSync = cachingStats.fileStat( _.pathRealMainDir() );
-// console.log( "\nfileStatSync: ",fileStatSync );
-// console.log( "cacheStats: ",cachingStats._cacheStats );
+var fileStatSync = cachingStats.fileStat( _.pathRealMainDir() );
+console.log( "\nfileStatSync: ",fileStatSync );
+console.log( "cacheStats: ",cachingStats._cacheStats );
 
 /* fileWrite - rewriting of a file updates stats cache */
 
