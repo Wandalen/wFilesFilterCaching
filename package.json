@@ -1,8 +1,8 @@
 {
-  "name": "wFiles",
+  "name": "wfilesfiltercaching",
   "version": "0.5.12",
   "engine": "node >= 6.0.0",
-  "description": "Files manipulation library of middle level.",
+  "description": "Filter for wFiles provider's that caches file stats, names and records.",
   "license": "MIT",
   "author": "Kostiantyn Wandalen <wtory.net@domainsbyproxy.com>",
   "contributors": [
@@ -19,7 +19,7 @@
       "email": "volodymyr.migdal@gmail.com"
     }
   ],
-  "main": "staging/amid/file/FileMid.s",
+  "main": "staging/amid/file/filter/Caching.s",
   "files": [
     "staging/amid",
     "production"
@@ -30,10 +30,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wandalen/wFiles.git"
+    "url": "https://github.com/Wandalen/wFilesFilterCaching.git"
   },
   "bugs": {
-    "url": "https://github.com/Wandalen/wFiles/issues"
+    "url": "https://github.com/Wandalen/wFilesFilterCaching/issues"
   },
   "dependencies": {
     "wTools": "",
