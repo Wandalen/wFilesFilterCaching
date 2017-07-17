@@ -5,8 +5,21 @@
 if( typeof module !== 'undefined' )
 {
 
-  require( 'wTools' );
-  require( 'wFiles' );
+  try
+  {
+    require( '../wTools.s' );
+  }
+  catch( err )
+  {
+    require( 'wTools' );
+  }
+
+  var _ = wTools;
+
+  _.include( 'wTools' );
+
+  if( !wTools.FileProvider.Partial )
+  require( '../aprovider/aPartial.s' );
 
 }
 
@@ -18,6 +31,7 @@ return;
 
 var _ = wTools;
 var Abstract = _.FileProvider.Abstract;
+var Partial = _.FileProvider.Partial;
 var Default = _.FileProvider.Default;
 var Parent = null;
 var Self = function wFileFilterCaching( o )
@@ -191,7 +205,7 @@ function fileStatAct( o )
 }
 
 fileStatAct.defaults = {};
-fileStatAct.defaults.__proto__ = Abstract.prototype.fileStatAct.defaults;
+fileStatAct.defaults.__proto__ = Partial.prototype.fileStatAct.defaults;
 
 //
 
@@ -312,7 +326,7 @@ function directoryReadAct( o )
 }
 
 directoryReadAct.defaults = {};
-directoryReadAct.defaults.__proto__ = Abstract.prototype.directoryReadAct.defaults;
+directoryReadAct.defaults.__proto__ = Partial.prototype.directoryReadAct.defaults;
 
 //
 
@@ -341,7 +355,7 @@ function fileRecord( filePath, o )
 }
 
 fileRecord.defaults = {};
-fileRecord.defaults.__proto__ = Abstract.prototype.fileRecord.defaults;
+fileRecord.defaults.__proto__ = Partial.prototype.fileRecord.defaults;
 
 //
 
@@ -588,7 +602,7 @@ function fileReadAct( o )
 }
 
 fileReadAct.defaults = {};
-fileReadAct.defaults.__proto__ = Abstract.prototype.fileReadAct.defaults;
+fileReadAct.defaults.__proto__ = Partial.prototype.fileReadAct.defaults;
 
 //
 
@@ -631,7 +645,7 @@ function fileHashAct( o )
 }
 
 fileHashAct.defaults = {};
-fileHashAct.defaults.__proto__ = Abstract.prototype.fileHashAct.defaults;
+fileHashAct.defaults.__proto__ = Partial.prototype.fileHashAct.defaults;
 
 //
 
@@ -667,7 +681,7 @@ function fileWriteAct( o )
 }
 
 fileWriteAct.defaults = {};
-fileWriteAct.defaults.__proto__ = Abstract.prototype.fileWriteAct.defaults;
+fileWriteAct.defaults.__proto__ = Partial.prototype.fileWriteAct.defaults;
 
 //
 
@@ -715,7 +729,7 @@ function fileTimeSetAct( o )
 }
 
 fileTimeSetAct.defaults = {};
-fileTimeSetAct.defaults.__proto__ = Abstract.prototype.fileTimeSetAct.defaults;
+fileTimeSetAct.defaults.__proto__ = Partial.prototype.fileTimeSetAct.defaults;
 
 //
 
@@ -744,7 +758,7 @@ function fileDelete( o )
 }
 
 fileDelete.defaults = {};
-fileDelete.defaults.__proto__ = Abstract.prototype.fileDelete.defaults;
+fileDelete.defaults.__proto__ = Partial.prototype.fileDelete.defaults;
 
 //
 
@@ -778,7 +792,7 @@ function directoryMake( o )
 }
 
 directoryMake.defaults = {};
-directoryMake.defaults.__proto__ = Abstract.prototype.directoryMake.defaults;
+directoryMake.defaults.__proto__ = Partial.prototype.directoryMake.defaults;
 
 //
 
@@ -914,7 +928,7 @@ function fileRenameAct( o )
 }
 
 fileRenameAct.defaults = {};
-fileRenameAct.defaults.__proto__ = Abstract.prototype.fileRenameAct.defaults;
+fileRenameAct.defaults.__proto__ = Partial.prototype.fileRenameAct.defaults;
 
 //
 
@@ -973,7 +987,7 @@ function fileCopyAct( o )
 }
 
 fileCopyAct.defaults = {};
-fileCopyAct.defaults.__proto__ = Abstract.prototype.fileCopyAct.defaults;
+fileCopyAct.defaults.__proto__ = Partial.prototype.fileCopyAct.defaults;
 
 //
 
@@ -1019,7 +1033,7 @@ function linkSoftAct( o )
 }
 
 linkSoftAct.defaults = {};
-linkSoftAct.defaults.__proto__ = Abstract.prototype.linkSoftAct.defaults;
+linkSoftAct.defaults.__proto__ = Partial.prototype.linkSoftAct.defaults;
 
 //
 
@@ -1065,7 +1079,7 @@ function linkHardAct( o )
 }
 
 linkHardAct.defaults = {};
-linkHardAct.defaults.__proto__ = Abstract.prototype.linkHardAct.defaults;
+linkHardAct.defaults.__proto__ = Partial.prototype.linkHardAct.defaults;
 
 //
 
@@ -1134,7 +1148,7 @@ function fileExchange( o )
 }
 
 fileExchange.defaults = {};
-fileExchange.defaults.__proto__ = Abstract.prototype.fileExchange.defaults;
+fileExchange.defaults.__proto__ = Partial.prototype.fileExchange.defaults;
 
 
 // --
