@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 
   try
   {
-    require( '../wTools.s' );
+    require( '../../../aBase/wTools.s' );
   }
   catch( err )
   {
@@ -15,8 +15,6 @@ if( typeof module !== 'undefined' )
   }
 
   var _ = wTools;
-
-  _.include( 'wTools' );
 
   if( !wTools.FileProvider.Partial )
   require( '../aprovider/aPartial.s' );
@@ -1241,7 +1239,7 @@ var Proto =
 
 _.mapExtend( Proto,Extend );
 
-_.protoMake
+_.prototypeMake
 ({
   cls : Self,
   parent : Parent,

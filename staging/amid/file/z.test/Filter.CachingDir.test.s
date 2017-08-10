@@ -29,7 +29,7 @@ else
 
 //
 
-var Parent = wTools.Testing;
+var Parent = wTools.Tester;
 
 var cachingDirs = _.FileFilter.Caching({ original : provider, cachingStats : 0, cachingRecord : 0 });
 
@@ -1082,6 +1082,6 @@ var Self =
 
 Self = wTestSuite( Self )
 if( typeof module !== 'undefined' && !module.parent )
-_.Testing.test( Self.name );
+_.Tester.test( Self.name );
 
 } )( );
