@@ -29,14 +29,17 @@
 
     <script src="../../../../node_modules/wRegexpObject/staging/abase/object/RegexpObject.s"></script>
 
-    <script src="../../../../node_modules/wFiles/staging/amid/file/aprovider/Abstract.s"></script>
+    <script src="../../../../node_modules/wFiles/staging/amid/file/aprovider/aAbstract.s"></script>
     <script src="../../../../node_modules/wFiles/staging/amid/file/Path.ss"></script>
-    <script src="../../../../node_modules/wFiles/staging/amid/file/aprovider/AdvancedMixin.s"></script>
+
+    <script src="../../../../node_modules/wFiles/staging/amid/file/aprovider/mFindMixn.s"></script>
+    <script src="../../../../node_modules/wFiles/staging/amid/file/aprovider/mSecondaryMixin.s"></script>
+
     <script src="../../../../node_modules/wFiles/staging/amid/file/FileBase.s"></script>
     <script src="../../../../node_modules/wFiles/staging/amid/file/FileMid.s"></script>
     <script src="../../../../node_modules/wFiles/staging/amid/file/FileRecordOptions.s"></script>
     <script src="../../../../node_modules/wFiles/staging/amid/file/FileRecord.s"></script>
-    <script src="../aprovider/SimpleStructure.s"></script>
+    <script src="../aprovider/pSimpleStructure.s"></script>
     <script src="../../../../node_modules/wFiles/staging/amid/file/filter/Caching.s"></script>
 
     <script src="../../../../node_modules/wLogger/staging/abase/printer/aChainingMixin.s"></script>
@@ -48,7 +51,7 @@
 
     <script src="../../../../node_modules/wTesting/staging/abase/xTesting/aTestSuite.debug.s"></script>
     <script src="../../../../node_modules/wTesting/staging/abase/xTesting/bTestRoutine.debug.s"></script>
-    <script src="../../../../node_modules/wTesting/staging/abase/xTesting/Testing.debug.s"></script>
+    <script src="../../../../node_modules/wTesting/staging/abase/xTesting/cTester.debug.s"></script>
 
     <script src="./Filter.cachingDir.test.s"></script>
     <script src="./Filter.cachingRecord.test.s"></script>
@@ -57,8 +60,8 @@
   <body>
     <script>
       var _ = wTools;
-      _.Testing.verbosity = 5;
-      _.Testing.testAll();
+      _.Tester.verbosity = 5;
+      _.Tester.testAll();
     </script>
   </body>
 </html>
