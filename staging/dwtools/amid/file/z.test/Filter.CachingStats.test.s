@@ -156,7 +156,7 @@ function fileStat( t )
   {
     var con = cachingStats.fileStat({ filePath : '_invalid path_', sync : 0, throwing : 1 });
     return t.shouldThrowErrorAsync( con )
-    .doThen( function ()
+    .doThen( function()
     {
     })
   })
@@ -500,8 +500,8 @@ function fileRename( t )
   {
     cachingStats.fileRename
     ({
-      pathSrc : filePath,
-      pathDst : ' ',
+      srcPath : filePath,
+      dstPath : ' ',
       sync : 1,
       rewriting : 1,
       throwing : 1,
@@ -516,8 +516,8 @@ function fileRename( t )
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : filePath,
-    pathDst : ' ',
+    srcPath : filePath,
+    dstPath : ' ',
     sync : 1,
     rewriting : 1,
     throwing : 0,
@@ -528,7 +528,7 @@ function fileRename( t )
   //
 
   t.description = 'rename in same directory';
-  var pathDst = _.pathJoin( testDirectory,'_file' );
+  var dstPath = _.pathJoin( testDirectory,'_file' );
 
   /* dst not exist */
 
@@ -537,13 +537,13 @@ function fileRename( t )
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : filePath,
-    pathDst : pathDst,
+    srcPath : filePath,
+    dstPath : dstPath,
   });
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
   t.identical( got, null );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
-  var expected = provider.fileStat( pathDst );
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
+  var expected = provider.fileStat( dstPath );
   t.identical( got.isFile(), true );
   t.identical([ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
 
@@ -551,25 +551,25 @@ function fileRename( t )
 
   provider.fileDelete( testDirectory );
   provider.fileWrite( filePath, testData );
-  provider.fileWrite( pathDst, testData + testData );
+  provider.fileWrite( dstPath, testData + testData );
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : filePath,
-    pathDst : pathDst,
+    srcPath : filePath,
+    dstPath : dstPath,
     rewriting : 1
   });
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
   t.identical( got, null );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
-  var expected = provider.fileStat( pathDst );
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
+  var expected = provider.fileStat( dstPath );
   t.identical( got.isFile(), true );
   t.identical([ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
 
   //
 
   t.description = 'rename dir';
-  var pathDst = _.pathJoin( testDirectory,'_file' );
+  var dstPath = _.pathJoin( testDirectory,'_file' );
 
   /* dst not exist */
 
@@ -578,8 +578,8 @@ function fileRename( t )
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : testDirectory,
-    pathDst : testDirectory + '_',
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
   });
   var got = cachingStats._cacheStats[ _.pathResolve( testDirectory + '_' ) ];
   var expected = provider.fileStat( testDirectory + '_' );
@@ -594,8 +594,8 @@ function fileRename( t )
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : testDirectory,
-    pathDst : testDirectory + '_',
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
     rewriting : 1,
   });
   var got = cachingStats._cacheStats[ _.pathResolve( testDirectory + '_' ) ];
@@ -611,8 +611,8 @@ function fileRename( t )
   cachingStats._cacheStats = {};
   cachingStats.fileRename
   ({
-    pathSrc : testDirectory,
-    pathDst : testDirectory + '_',
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
     rewriting : 1
   });
   var got = cachingStats._cacheStats[ _.pathResolve( testDirectory + '_' ) ];
@@ -632,8 +632,8 @@ function fileRename( t )
   {
     cachingStats.fileRename
     ({
-      pathSrc : testDirectory,
-      pathDst : testDirectory + '_',
+      srcPath : testDirectory,
+      dstPath : testDirectory + '_',
     });
   })
   var got1 = cachingStats._cacheStats[ _.pathResolve( testDirectory ) ];
@@ -655,8 +655,8 @@ function fileRename( t )
   {
     cachingStats.fileRename
     ({
-      pathSrc : testDirectory,
-      pathDst : testDirectory + '_',
+      srcPath : testDirectory,
+      dstPath : testDirectory + '_',
       throwing : 0
     });
   })
@@ -676,8 +676,8 @@ function fileRename( t )
   cachingStats.fileStat( filePath );
   cachingStats.fileRename
   ({
-    pathSrc : testDirectory,
-    pathDst : testDirectory + '_',
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
     rewriting : 1
   });
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
@@ -706,8 +706,8 @@ function fileCopy( t )
   {
     cachingStats.fileCopy
     ({
-      pathSrc : filePath,
-      pathDst : ' ',
+      srcPath : filePath,
+      dstPath : ' ',
       sync : 1,
       rewriting : 1,
       throwing : 1,
@@ -724,8 +724,8 @@ function fileCopy( t )
   {
     cachingStats.fileCopy
     ({
-      pathSrc : filePath,
-      pathDst : ' ',
+      srcPath : filePath,
+      dstPath : ' ',
       sync : 1,
       rewriting : 1,
       throwing : 0,
@@ -738,7 +738,7 @@ function fileCopy( t )
   //
 
   t.description = 'dst not exist';
-  var pathDst = _.pathJoin( testDirectory, 'dst' );
+  var dstPath = _.pathJoin( testDirectory, 'dst' );
 
   /* file */
 
@@ -746,8 +746,8 @@ function fileCopy( t )
   provider.fileWrite( filePath, testData );
   cachingStats.fileCopy
   ({
-    pathSrc : filePath,
-    pathDst : pathDst,
+    srcPath : filePath,
+    dstPath : dstPath,
     sync : 1,
     rewriting : 1,
     throwing : 1,
@@ -755,20 +755,20 @@ function fileCopy( t )
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
-  var expected = provider.fileStat( pathDst );
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
+  var expected = provider.fileStat( dstPath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
 
   /* file, rewriting dst - terminal file  */
 
   cachingStats._cacheStats = {};
-  var pathDst = _.pathJoin( testDirectory, 'dst' );
+  var dstPath = _.pathJoin( testDirectory, 'dst' );
   provider.fileWrite( filePath, testData );
-  provider.fileWrite( pathDst, testData + testData );
+  provider.fileWrite( dstPath, testData + testData );
   cachingStats.fileCopy
   ({
-    pathSrc : filePath,
-    pathDst : pathDst,
+    srcPath : filePath,
+    dstPath : dstPath,
     sync : 1,
     rewriting : 1,
     throwing : 1,
@@ -776,22 +776,22 @@ function fileCopy( t )
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
-  var expected = provider.fileStat( pathDst );
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
+  var expected = provider.fileStat( dstPath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
 
   /* file, rewriting dst - terminal file, rewriting off  */
 
   cachingStats._cacheStats = {};
-  var pathDst = _.pathJoin( testDirectory, 'dst' );
+  var dstPath = _.pathJoin( testDirectory, 'dst' );
   provider.fileWrite( filePath, testData );
-  provider.fileWrite( pathDst, testData + testData );
+  provider.fileWrite( dstPath, testData + testData );
   t.shouldThrowErrorSync( function()
   {
     cachingStats.fileCopy
     ({
-      pathSrc : filePath,
-      pathDst : pathDst,
+      srcPath : filePath,
+      dstPath : dstPath,
       sync : 1,
       rewriting : 0,
       throwing : 1,
@@ -800,21 +800,21 @@ function fileCopy( t )
   var got = cachingStats._cacheStats[ _.pathResolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
-  var expected = provider.fileStat( pathDst );
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
+  var expected = provider.fileStat( dstPath );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
 
   /* copy folders, src is not a terminal file */
 
   cachingStats._cacheStats = {};
-  pathDst = testDirectory + '_';
+  dstPath = testDirectory + '_';
   provider.fileWrite( filePath, testData );
   t.shouldThrowErrorSync( function()
   {
     cachingStats.fileCopy
     ({
-      pathSrc : testDirectory,
-      pathDst : pathDst,
+      srcPath : testDirectory,
+      dstPath : dstPath,
       sync : 1,
       rewriting : 1,
       throwing : 1,
@@ -824,7 +824,7 @@ function fileCopy( t )
   var got = cachingStats._cacheStats[ _.pathResolve( testDirectory ) ];
   var expected = provider.fileStat( testDirectory );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
-  var got = cachingStats._cacheStats[ _.pathResolve( pathDst ) ];
+  var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
   t.identical( got, undefined );
 }
 
@@ -903,8 +903,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 1,
       allowMissing : 0
     });
@@ -922,8 +922,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 0,
       allowMissing : 0
     });
@@ -942,8 +942,8 @@ function fileExchange( t )
   var expected = provider.fileStat( filePath2 );
   cachingStats.fileExchange
   ({
-    pathDst : filePath2,
-    pathSrc : filePath,
+    dstPath : filePath2,
+    srcPath : filePath,
     throwing : 1,
     allowMissing : 1
   });
@@ -965,8 +965,8 @@ function fileExchange( t )
   var expected = provider.fileStat( filePath );
   cachingStats.fileExchange
   ({
-    pathDst : filePath2,
-    pathSrc : filePath,
+    dstPath : filePath2,
+    srcPath : filePath,
     throwing : 1,
     allowMissing : 1
   });
@@ -984,8 +984,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 1,
       allowMissing : 0
     });
@@ -1005,8 +1005,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 0,
       allowMissing : 0
     });
@@ -1030,8 +1030,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 1,
       allowMissing : 1
     });
@@ -1050,8 +1050,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 0,
       allowMissing : 1
     });
@@ -1070,8 +1070,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 1,
       allowMissing : 0
     });
@@ -1090,8 +1090,8 @@ function fileExchange( t )
   {
     cachingStats.fileExchange
     ({
-      pathDst : filePath2,
-      pathSrc : filePath,
+      dstPath : filePath2,
+      srcPath : filePath,
       throwing : 0,
       allowMissing : 0
     });
@@ -1112,6 +1112,7 @@ var Self =
 {
 
   name : 'FileFilter.CachingStats',
+  silencing : 1,
 
   tests :
   {

@@ -19,9 +19,9 @@
       "email": "volodymyr.migdal@gmail.com"
     }
   ],
-  "main": "staging/amid/file/filter/Caching.s",
+  "main": "staging/dwtools/amid/file/filter/Caching.s",
   "files": [
-    "staging/amid",
+    "staging/dwtools/amid",
     "production"
   ],
   "scripts": {
