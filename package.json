@@ -46,7 +46,8 @@
   },
   "devDependencies": {
     "wTesting": "",
-    "typedarray-to-buffer": ""
+    "typedarray-to-buffer": "",
+    "wfilesfiltercaching": "."
   },
   "keywords": [
     "wTools",
