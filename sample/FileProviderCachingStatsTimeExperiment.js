@@ -16,7 +16,5 @@ for( var i = 0; i < 10000; ++i )
 {
   filter.fileStat( { filePath : __filename } )
 }
+
 console.log( _.timeSpent( 'Spent to make filter.fileStat 10k times, using native path',time-timeSingle ) );
-
-
-
