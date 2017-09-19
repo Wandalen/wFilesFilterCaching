@@ -371,7 +371,6 @@ function fileWatcher( t )
 
 fileWatcher.timeOut = 60000;
 
-
 //
 
 function fileWatcherOnReady( t )
@@ -379,22 +378,39 @@ function fileWatcherOnReady( t )
   var filePath = _.pathResolve( _.pathJoin( testDirectory, 'file' ) );
   var pathDir = provider.pathNativize( _.pathDir( filePath ) );
 
-  var caching = _.FileFilter.Caching({ watchPath : pathDir, watchOptions : { skipEvents : true } });
-  var onReady = caching.fileWatcher.onReady.eitherThenSplit( _.timeOutError( 30000 ) );
-
-  //
-
-  t.description = 'Caching.fileWatcher onReady consequence test'
+  var con = new wConsequence().give()
 
   /**/
 
-  onReady.doThen( ( err, got ) =>
+  .doThen( function()
   {
-    t.identical( got, 'ready' );
-    t.identical( caching.fileWatcher._readyEmitted, true );
-    t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
+    var onReady = caching.fileWatcher.onReady;
+
+    t.description = 'Caching.fileWatcher onReady consequence test'
+
+    onReady.doThen( ( err, got ) =>
+    {
+      t.identical( got, 'ready' );
+      t.identical( caching.fileWatcher._readyEmitted, true );
+      t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+    })
+    return onReady;
   })
-  return onReady;
+
+  /**/
+
+  .doThen( function()
+  {
+    var caching = _.FileFilter.Caching({ watchPath : testDirectory, watchOptions : { skipReadyEvent : 1 } });
+    var onReady = caching.fileWatcher.onReady.eitherThenSplit( _.timeOutError( 10000 ) )
+
+    t.description = 'Caching.fileWatcher onReady consequence test'
+
+    return t.shouldThrowError( onReady );
+  })
+
+  return con;
 }
 
 fileWatcherOnReady.timeOut = 40000;
@@ -406,26 +422,30 @@ function fileWatcherOnUpdate( t )
   var filePath = _.pathResolve( _.pathJoin( testDirectory, 'file' ) );
   var pathDir = provider.pathNativize( _.pathDir( filePath ) );
 
-  var caching = _.FileFilter.Caching({ watchPath : pathDir, watchOptions : {} });
-  var onReady = caching.fileWatcher.onReady.split();
-  var onUpdate = caching.fileWatcher.onUpdate.eitherThenSplit( _.timeOutError( 30000 ) );
-
-  //
-
-  t.description = 'Caching.fileWatcher onUpdate consequence test'
+  var con = new wConsequence().give()
 
   /**/
 
-  onReady.doThen( function( err, got )
+  .doThen( function()
   {
-    t.identical( got, 'ready' );
-    t.identical( caching.fileWatcher._readyEmitted, true );
-    t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
+    var onReady = caching.fileWatcher.onReady;
+    var onUpdate = caching.fileWatcher.onUpdate.eitherThenSplit( _.timeOutError( 10000 ) );
 
-    return t.shouldThrowErrorAsync( onUpdate );
-  })
+    t.description = 'Caching.fileWatcher onUpdate consequence test'
 
-  return onReady;
+    onReady.doThen( ( err, got ) =>
+    {
+      t.identical( got, 'ready' );
+      t.identical( caching.fileWatcher._readyEmitted, true );
+      t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+
+      return t.shouldThrowError( onUpdate )
+    })
+    return onReady;
+  });
+
+  return con;
 }
 
 fileWatcherOnUpdate.timeOut = 40000;

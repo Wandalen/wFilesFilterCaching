@@ -513,7 +513,7 @@ function _createFileWatcher()
     self.fileWatcher.onReady = new wConsequence();
     self.fileWatcher.onUpdate = new wConsequence();
 
-
+    if( !self.watchOptions.skipReadyEvent )
     self.fileWatcher.on( 'ready', function( path )
     {
       self.fileWatcher.onReady.give( 'ready' );
