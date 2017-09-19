@@ -32,3 +32,4 @@ console.log( stats );
 console.log( "Stats: ", caching._cacheStats );
 
 ```
+

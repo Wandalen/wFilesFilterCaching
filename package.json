@@ -1,6 +1,6 @@
 {
   "name": "wfilesfiltercaching",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "engine": "node >= 6.0.0",
   "description": "Filter for wFiles provider's that caches file stats, names and records.",
   "license": "MIT",
@@ -19,9 +19,9 @@
       "email": "volodymyr.migdal@gmail.com"
     }
   ],
-  "main": "staging/amid/file/filter/Caching.s",
+  "main": "staging/dwtools/amid/file/filter/Caching.s",
   "files": [
-    "staging/amid",
+    "staging/dwtools/amid",
     "production"
   ],
   "scripts": {
@@ -46,7 +46,8 @@
   },
   "devDependencies": {
     "wTesting": "",
-    "typedarray-to-buffer": ""
+    "typedarray-to-buffer": "",
+    "wfilesfiltercaching": "."
   },
   "keywords": [
     "wTools",

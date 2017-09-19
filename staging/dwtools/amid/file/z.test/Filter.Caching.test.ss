@@ -42,7 +42,7 @@ function fileWatcher( t )
   var onReady = caching.fileWatcher.onReady.split();
   var onUpdate = caching.fileWatcher.onUpdate;
 
-  var pathDst = _.pathResolve( _.pathJoin( pathDir, 'dst' ) );
+  var dstPath = _.pathResolve( _.pathJoin( pathDir, 'dst' ) );
 
   function _cacheFile( filePath, clear )
   {
@@ -61,11 +61,11 @@ function fileWatcher( t )
   /* write file, file cached */
 
   onReady
-  .got( function ()
+  .got( function()
   {
     _cacheFile( filePath );
     provider.fileWrite( filePath, testData );
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
       var got = caching._cacheStats[ filePath ];
       var expected = provider.fileStat( filePath );
@@ -81,11 +81,11 @@ function fileWatcher( t )
 
   /* write file, dir cached */
 
-  .got( function ()
+  .got( function()
   {
     _cacheFile( _.pathResolve( pathDir ), true );
     provider.fileWrite( filePath, testData );
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
       var pathDir = _.pathResolve( _.pathDir( filePath ) );
       var got = caching._cacheStats[ pathDir ];
@@ -102,11 +102,11 @@ function fileWatcher( t )
 
   /* delete file, file cached */
 
-  .got( function ()
+  .got( function()
   {
     _cacheFile( filePath, true );
     provider.fileDelete( filePath );
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
       var got = caching._cacheStats[ filePath ];
       t.identical( got, null );
@@ -121,12 +121,12 @@ function fileWatcher( t )
 
   /* write big file */
 
-  .got( function ()
+  .got( function()
   {
     _cacheFile( filePath, true );
     var data = _.strDup( testData, 8000000 );
     provider.fileWrite( filePath, data )
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
       var got = caching._cacheStats[ filePath ];
       var expected = provider.fileStat( filePath );
@@ -142,23 +142,23 @@ function fileWatcher( t )
 
   /* copy file */
 
-  .got( function ()
+  .got( function()
   {
-    _cacheFile( pathDst, true );
+    _cacheFile( dstPath, true );
     provider.fileWrite( filePath, testData );
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
-      provider.fileCopy( pathDst, filePath );
+      provider.fileCopy( dstPath, filePath );
     })
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
-      var got = caching._cacheStats[ pathDst ];
-      var expected = provider.fileStat( pathDst );
+      var got = caching._cacheStats[ dstPath ];
+      var expected = provider.fileStat( dstPath );
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-      var got = caching._cacheRecord[ pathDst ][ 1 ].stat;
+      var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-      var got = caching._cacheDir[ pathDst ];
-      var expected = [ _.pathName( pathDst ) ];
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.pathName( dstPath ) ];
       t.identical( got, expected );
       onReady.give();
     })
@@ -166,9 +166,9 @@ function fileWatcher( t )
 
   /* !!! onUpdate is not receiving any messages is call this case in sequence with others */
 
-  .got( function ()
+  .got( function()
   {
-    _cacheFile( pathDst, true );
+    _cacheFile( dstPath, true );
 
     provider.fileWrite( filePath, testData );
 
@@ -179,22 +179,22 @@ function fileWatcher( t )
     onUpdate = onUpdate.eitherThenSplit( _.timeOutError( 3000 ) );
     t.mustNotThrowError( onUpdate.split() );
 
-    onUpdate.got( function ( err )
+    onUpdate.got( function( err )
     {
       if( err )
       return onReady.give();
 
-      provider.fileCopy( pathDst, filePath );
+      provider.fileCopy( dstPath, filePath );
     })
-    onUpdate.got( function ()
+    onUpdate.got( function()
     {
-      var got = caching._cacheStats[ pathDst ];
-      var expected = provider.fileStat( pathDst );
+      var got = caching._cacheStats[ dstPath ];
+      var expected = provider.fileStat( dstPath );
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-      var got = caching._cacheRecord[ pathDst ][ 1 ].stat;
+      var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-      var got = caching._cacheDir[ pathDst ];
-      var expected = [ _.pathName( pathDst ) ];
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.pathName( dstPath ) ];
       t.identical( got, expected );
       onReady.give();
     })
@@ -202,7 +202,7 @@ function fileWatcher( t )
 
   /* immediate writing and deleting of a file gives timeOutError becase no events emitted by chokidar */
 
-  .got( function ()
+  .got( function()
   {
     var newFile = _.pathResolve( _.pathJoin( pathDir, 'new' ) );
     _cacheFile( newFile, true );
@@ -212,7 +212,7 @@ function fileWatcher( t )
     onUpdate = onUpdate.eitherThenSplit( _.timeOutError( 3000 ) );
     t.mustNotThrowError( onUpdate.split() );
 
-    onUpdate.got( function ( err, got )
+    onUpdate.got( function( err, got )
     {
       if( err )
       return onReady.give();
@@ -222,8 +222,8 @@ function fileWatcher( t )
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
       var got = caching._cacheRecord[ newFile ][ 1 ].stat;
       t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-      var got = caching._cacheDir[ pathDst ];
-      var expected = [ _.pathName( pathDst ) ];
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.pathName( dstPath ) ];
       t.identical( got, expected );
       onReady.give();
     })
@@ -274,7 +274,7 @@ function fileWatcherOnUpdate( t )
 
   /**/
 
-  onReady.doThen( function ( err, got )
+  onReady.doThen( function( err, got )
   {
     t.identical( got, 'ready' );
 
@@ -296,6 +296,7 @@ var Self =
 {
 
   name : 'Filter.Caching',
+  silencing : 1,
 
   tests :
   {
