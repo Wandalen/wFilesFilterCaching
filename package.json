@@ -21,7 +21,7 @@
   ],
   "main": "staging/dwtools/amid/file/filter/Caching.s",
   "files": [
-    "staging/dwtools/amid",
+    "staging/dwtools/amid/file",
     "production"
   ],
   "scripts": {
