@@ -4,7 +4,7 @@
 
 if( typeof module !== 'undefined' )
 {
-  require( '../filter/Caching.s' );
+  require( '../file/filter/Caching.s' );
 
   var _ = wTools;
 
@@ -28,7 +28,7 @@ function makeTestDir()
   testDirectory = _.dirTempFor
   ({
     packageName : Self.name,
-    packagePath : _.pathResolve( _.pathRealMainDir(), '../../../tmp.tmp' )
+    packagePath : _.pathResolve( _.pathRealMainDir(), '../../tmp.tmp' )
   });
 
   testDirectory = _.fileProvider.pathNativize( testDirectory );

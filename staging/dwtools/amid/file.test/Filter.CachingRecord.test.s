@@ -5,7 +5,7 @@ var isBrowser = true;
 if( typeof module !== 'undefined' )
 {
   isBrowser = false;
-  require( '../filter/Caching.s' );
+  require( '../file/filter/Caching.s' );
 
   var _ = wTools;
 
@@ -17,15 +17,42 @@ if( typeof module !== 'undefined' )
 
 var _ = wTools;
 
+var makeTestDir = function makeTestDir(){};
+var cleanTestDir = function cleanTestDir(){};
+var provider;
+
+var testDirectory;
+
 if( !isBrowser )
 {
-  var testDirectory = __dirname + '/../../../../tmp.tmp/cachingRecord';
-  var provider = _.FileProvider.HardDrive();
+  provider = _.FileProvider.HardDrive();
+
+  makeTestDir = function makeTestDir()
+  {
+    testDirectory = _.dirTempFor
+    ({
+      packageName : Self.name,
+      packagePath : _.pathResolve( _.pathRealMainDir(), '../../tmp.tmp' )
+    });
+
+    testDirectory = _.fileProvider.pathNativize( testDirectory );
+
+    if( _.fileProvider.fileStat( testDirectory ) )
+    _.fileProvider.fileDelete( testDirectory );
+
+    _.fileProvider.directoryMake( testDirectory );
+  }
+
+  cleanTestDir = function cleanTestDir()
+  {
+    _.fileProvider.fileDelete( testDirectory );
+  }
 }
 else
-{ var testTree = {};
-  var provider = _.FileProvider.SimpleStructure({ filesTree : testTree });
-  var testDirectory = '/tmp.tmp/cachingRecord';
+{
+  var testTree = {};
+  provider = _.FileProvider.SimpleStructure({ filesTree : testTree });
+  testDirectory = 'tmp.tmp/cachingRecord';
 }
 
 //
@@ -1091,6 +1118,9 @@ var Self =
 
   name : 'FileFilter.CachingRecord',
   silencing : 1,
+
+  onSuiteBegin : makeTestDir,
+  onSuiteEnd : cleanTestDir,
 
   tests :
   {
