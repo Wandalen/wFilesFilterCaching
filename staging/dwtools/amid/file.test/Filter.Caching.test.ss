@@ -18,26 +18,12 @@ if( typeof module !== 'undefined' )
 
 var _ = wTools;
 var Parent = wTools.Tester;
-var testDirectory;
+var testDirectory = _.dirTempMake( _.pathJoin( __dirname, '../..' ) );
 
 var provider = _.fileProvider;
 var testData = 'data';
 
-function makeTestDir()
-{
-  testDirectory = _.dirTempFor
-  ({
-    packageName : Self.name,
-    packagePath : _.pathResolve( _.pathRealMainDir(), '../../tmp.tmp' )
-  });
-
-  testDirectory = _.fileProvider.pathNativize( testDirectory );
-
-  if( _.fileProvider.fileStat( testDirectory ) )
-  _.fileProvider.fileDelete( testDirectory );
-
-  _.fileProvider.directoryMake( testDirectory );
-}
+//
 
 function cleanTestDir()
 {
@@ -462,7 +448,6 @@ var Self =
   name : 'Filter.Caching',
   silencing : 1,
 
-  onSuiteBegin : makeTestDir,
   onSuiteEnd : cleanTestDir,
 
   tests :
