@@ -16,8 +16,8 @@ if( typeof module !== 'undefined' )
 
   var _ = wTools;
 
-  if( !wTools.FileProvider.Partial )
-  require( '../fprovider/aPartial.s' );
+  if( !wTools.FileProvider )
+  require( 'wFiles' );
 
 }
 
@@ -501,7 +501,7 @@ function _createFileWatcher()
     var chokidar = require('chokidar');
 
     self.watchOptions.ignoreInitial = true;
-    // self.watchOptions.usePolling = true;
+    self.watchOptions.usePolling = true;
     // self.watchOptions.awaitWriteFinish =
     // {
     //   stabilityThreshold: 2000,
@@ -513,7 +513,7 @@ function _createFileWatcher()
     self.fileWatcher.onReady = new wConsequence();
     self.fileWatcher.onUpdate = new wConsequence();
 
-
+    if( !self.watchOptions.skipReadyEvent )
     self.fileWatcher.on( 'ready', function( path )
     {
       self.fileWatcher.onReady.give( 'ready' );
@@ -526,27 +526,32 @@ function _createFileWatcher()
 
     self.fileWatcher.on( 'all', function( event, path, details )
     {
-      // console.log( event, path );
+      var info =
+      {
+        event : event,
+        path : path,
+        details : details
+      };
 
       if( event === 'add' || event === 'addDir' )
       {
           self._statUpdate( path );
           self._dirUpdate( path );
           self._recordUpdate( path );
-          self.fileWatcher.onUpdate.give( event );
+          self.fileWatcher.onUpdate.give( info );
       }
 
       if( event === 'change' )
       {
         self._statUpdate( path );
         self._recordUpdate( path );
-        self.fileWatcher.onUpdate.give( event );
+        self.fileWatcher.onUpdate.give( info );
       }
 
       if( event === 'unlink' || event === 'unlinkDir' )
       {
         self._removeFromCache( path );
-        self.fileWatcher.onUpdate.give( event );
+        self.fileWatcher.onUpdate.give( info );
       }
     });
   }
