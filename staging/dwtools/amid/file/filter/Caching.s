@@ -333,18 +333,25 @@ function fileRecord( filePath, o )
   var self = this;
 
   if( !self.cachingRecord )
-  return _.FileRecord( filePath, o );
+  return self.original.fileRecord( filePath, o );
 
-  var record = _.FileRecord._fileRecordAdjust( filePath, o );
+  // var record = _.FileRecord._fileRecordAdjust( filePath, o );
 
-  if( self._cacheRecord[ record.absolute ] !== undefined )
+  if( self._cacheRecord[ filePath ] !== undefined )
   {
-    var index = self._cacheRecord[ record.absolute ].indexOf( o );
+    var index = self._cacheRecord[ filePath ].indexOf( o );
     if( index >= 0 )
-    return self._cacheRecord[ record.absolute ][ index + 1 ];
+    return self._cacheRecord[ filePath ][ index + 1 ];
   }
 
-  var record = _.FileRecord( filePath, o );
+  // if( self._cacheRecord[ record.absolute ] !== undefined )
+  // {
+  //   var index = self._cacheRecord[ record.absolute ].indexOf( o );
+  //   if( index >= 0 )
+  //   return self._cacheRecord[ record.absolute ][ index + 1 ];
+  // }
+
+  var record = self.original.fileRecord( filePath, o );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
   self._cacheRecord[ record.absolute ].push( o, record );
