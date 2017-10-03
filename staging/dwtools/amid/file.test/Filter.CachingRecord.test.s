@@ -1109,6 +1109,107 @@ function fileExchange( t )
 
 }
 
+function fileRecord( test )
+{
+  var cachingRecord = _.FileFilter.Caching({ original : provider, cachingDirs : 0, cachingStats : 0 });
+  var dir = testDirectory;
+  var fileRecord = _.routineJoin( cachingRecord, cachingRecord.fileRecord );
+  var filePath,got;
+  // var o = { fileProvider :  cachingRecord.original };
+
+  function check( got, path, o )
+  {
+    var pathName = _.pathName( path );
+    var ext = _.pathExt( path );
+    var stat = _.fileProvider.fileStat( path );
+
+    test.identical( got.absolute, path );
+
+    if( o && o.dir === path )
+    test.identical( got.relative, '.' );
+    else
+    test.identical( got.relative, _.pathDot( _.pathRelative( o.dir, path ) ) );
+
+    test.identical( got.ext, ext );
+    test.identical( got.extWithDot, '.' + ext );
+
+    test.identical( got.name, pathName );
+    test.identical( got.nameWithExt, pathName + '.' + ext );
+
+    if( stat )
+    test.identical( got.stat.size, stat.size );
+    else
+    test.identical( got.stat, null );
+  }
+
+  //
+
+  test.description = 'dir/relative options';
+  var recordOptions = { dir : dir };
+
+  /*absolute path, not exist*/
+
+  filePath = _.pathJoin( dir, 'invalid.txt' );
+  var got = fileRecord( filePath,recordOptions );
+  check( got, filePath, recordOptions );
+  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
+
+  /*absolute path, terminal file*/
+
+  filePath = _.pathRealMainFile();
+  var got = fileRecord( filePath,recordOptions );
+  check( got, filePath, recordOptions );
+  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
+
+  /*absolute path, dir*/
+
+  filePath = dir;
+  var got = fileRecord( filePath,recordOptions );
+  check( got, filePath,recordOptions );
+  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
+
+
+  /*absolute path, change dir to it root, filePath - dir*/
+
+  filePath = dir;
+  cachingRecord._cacheRecord = Object.create( null );
+  var recordOptions = { dir : _.pathDir( dir ) };
+  var got = fileRecord( filePath,recordOptions );
+  check( got, filePath,recordOptions );
+  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
+  test.identical( got.stat.isDirectory(), true )
+  test.identical( got.isDirectory, true );
+  test.identical( got._isDir(), true );
+
+
+  test.description = 'same filePath, different options';
+  filePath = dir;
+  cachingRecord._cacheRecord = Object.create( null );
+  var recordOptions = { dir : _.pathDir( dir ) };
+  var options =
+  [
+    { relative : _.pathDir( dir ) },
+    { relative : _.pathDir( _.pathDir( dir ) ) },
+    { relative : '/X' }
+  ]
+  options.forEach( ( o ) =>
+  {
+    fileRecord( filePath, o );
+  })
+
+  /* records must be cached */
+
+  test.identical( cachingRecord._cacheRecord[ filePath ].length / 2, options.length );
+
+  options.forEach( ( o ) =>
+  {
+    var got = fileRecord( filePath, o );
+    var i = cachingRecord._cacheRecord[ filePath ].indexOf( got );
+    test.shouldBe( i !== -1 )
+  })
+
+}
+
 // --
 // proto
 // --
@@ -1131,6 +1232,7 @@ var Self =
     fileRename : fileRename,
     fileCopy : fileCopy,
     fileExchange : fileExchange,
+    fileRecord : fileRecord
   },
 
 }

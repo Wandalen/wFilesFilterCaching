@@ -335,23 +335,24 @@ function fileRecord( filePath, o )
   if( !self.cachingRecord )
   return self.original.fileRecord( filePath, o );
 
-  // var record = _.FileRecord._fileRecordAdjust( filePath, o );
+  if( o === undefined )
+  o = Object.create( null );
+
+  // if( !_.mapOwnKeys( o ).length )
+  // o.fileProvider = self.original;
 
   if( self._cacheRecord[ filePath ] !== undefined )
   {
-    var index = self._cacheRecord[ filePath ].indexOf( o );
-    if( index >= 0 )
-    return self._cacheRecord[ filePath ][ index + 1 ];
+    var records = self._cacheRecord[ filePath ];
+    for( var i = 0; i < records.length; i += 2 )
+    {
+      if( _.mapIdentical( records[ i ], o ) )
+      return records[ i + 1 ];
+    }
   }
 
-  // if( self._cacheRecord[ record.absolute ] !== undefined )
-  // {
-  //   var index = self._cacheRecord[ record.absolute ].indexOf( o );
-  //   if( index >= 0 )
-  //   return self._cacheRecord[ record.absolute ][ index + 1 ];
-  // }
-
-  var record = self.original.fileRecord( filePath, o );
+  var options = _.mapExtend( {}, o );
+  var record = self.original.fileRecord( filePath, options );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
   self._cacheRecord[ record.absolute ].push( o, record );
@@ -405,7 +406,7 @@ function _recordUpdate( path )
     for( var i = 1; i <= self._cacheRecord[ filePath ].length; i += 2 )
     {
       var o = self._cacheRecord[ filePath ][ i - 1 ];
-      self._cacheRecord[ filePath ][ i ] = _.FileRecord( filePath, o );
+      self._cacheRecord[ filePath ][ i ] = self.original.fileRecord( filePath, o );
     }
   }
 }
