@@ -1115,7 +1115,6 @@ function fileRecord( test )
   var dir = testDirectory;
   var fileRecord = _.routineJoin( cachingRecord, cachingRecord.fileRecord );
   var filePath,got;
-  // var o = { fileProvider :  cachingRecord.original };
 
   function check( got, path, o )
   {
@@ -1152,6 +1151,7 @@ function fileRecord( test )
   filePath = _.pathJoin( dir, 'invalid.txt' );
   var got = fileRecord( filePath,recordOptions );
   check( got, filePath, recordOptions );
+  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
   test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
 
   /*absolute path, terminal file*/
@@ -1159,6 +1159,7 @@ function fileRecord( test )
   filePath = _.pathRealMainFile();
   var got = fileRecord( filePath,recordOptions );
   check( got, filePath, recordOptions );
+  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
   test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
 
   /*absolute path, dir*/
@@ -1166,6 +1167,7 @@ function fileRecord( test )
   filePath = dir;
   var got = fileRecord( filePath,recordOptions );
   check( got, filePath,recordOptions );
+  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
   test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
 
 
@@ -1176,6 +1178,7 @@ function fileRecord( test )
   var recordOptions = { dir : _.pathDir( dir ) };
   var got = fileRecord( filePath,recordOptions );
   check( got, filePath,recordOptions );
+  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
   test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
   test.identical( got.stat.isDirectory(), true )
   test.identical( got.isDirectory, true );
@@ -1204,9 +1207,24 @@ function fileRecord( test )
   options.forEach( ( o ) =>
   {
     var got = fileRecord( filePath, o );
+    var i = cachingRecord._cacheRecord[ filePath ].indexOf( o );
+    test.shouldBe( i !== -1 );
     var i = cachingRecord._cacheRecord[ filePath ].indexOf( got );
-    test.shouldBe( i !== -1 )
+    test.shouldBe( i !== -1 );
   })
+
+  //
+
+  test.description = 'changing cachingRecord option';
+  cachingRecord.cachingRecord = 0;
+  cachingRecord._cacheRecord = Object.create( null );
+  fileRecord( filePath );
+  test.identical( cachingRecord._cacheRecord, Object.create( null ) );
+  cachingRecord.cachingRecord = 1;
+  var got = fileRecord( filePath );
+  var i = cachingRecord._cacheRecord[ filePath ].indexOf( got );
+  test.shouldBe( i !== -1 );
+
 
 }
 
