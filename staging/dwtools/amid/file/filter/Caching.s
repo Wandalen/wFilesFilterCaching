@@ -398,17 +398,27 @@ function _recordUpdate( path )
 {
   var self = this;
 
-  var filePath = _.pathResolve( path );
-
-  if( self.cachingRecord )
-  if( self._cacheRecord[ filePath ] !== undefined )
+  function _update( filePath )
   {
-    for( var i = 1; i <= self._cacheRecord[ filePath ].length; i += 2 )
+    if( self._cacheRecord[ filePath ] !== undefined )
     {
-      var o = self._cacheRecord[ filePath ][ i - 1 ];
-      self._cacheRecord[ filePath ][ i ] = self.original.fileRecord( filePath, o );
+      for( var i = 1; i <= self._cacheRecord[ filePath ].length; i += 2 )
+      {
+        var o = self._cacheRecord[ filePath ][ i - 1 ];
+        self._cacheRecord[ filePath ][ i ] = self.original.fileRecord( filePath, o );
+      }
     }
   }
+
+  if( self.cachingRecord )
+  {
+    var filePath = _.pathResolve( path );
+    var dirPath = _.pathDir( filePath );
+
+    _update( filePath );
+    _update( dirPath );
+  }
+
 }
 
 //
@@ -426,6 +436,11 @@ function _statUpdate( path,stat )
       stat = self.original.fileStat( path );
       self._cacheStats[ filePath ] = stat;
     }
+
+    var pathDir = _.pathDir( filePath );
+
+    if( self._cacheStats[ pathDir ] !== undefined )
+    self._cacheStats[ pathDir ] = self.original.fileStat( pathDir );
   }
 }
 
@@ -509,6 +524,7 @@ function _createFileWatcher()
     var chokidar = require('chokidar');
 
     self.watchOptions.ignoreInitial = true;
+    self.watchOptions.alwaysStat = true;
     self.watchOptions.usePolling = true;
     // self.watchOptions.awaitWriteFinish =
     // {
@@ -527,12 +543,7 @@ function _createFileWatcher()
       self.fileWatcher.onReady.give( 'ready' );
     });
 
-    // self.fileWatcher.on( 'raw', function( event, path, details )
-    // {
-    //   console.log(event, path, details);
-    // })
-
-    self.fileWatcher.on( 'all', function( event, path, details )
+    self.fileWatcher.on( 'raw', function( event, path, details )
     {
       var info =
       {
@@ -540,6 +551,21 @@ function _createFileWatcher()
         path : path,
         details : details
       };
+
+      // console.log( 'raw:', _.toStr( info, { levels : 99 } ) )
+    })
+
+    self.fileWatcher.on( 'all', function( event, path, details )
+    {
+      // debugger
+      var info =
+      {
+        event : event,
+        path : path,
+        details : details
+      };
+
+      // console.log( _.toStr( info, { levels : 99 } ) )
 
       if( event === 'add' || event === 'addDir' )
       {
