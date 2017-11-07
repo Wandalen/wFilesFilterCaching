@@ -332,11 +332,11 @@ function fileRecord( filePath, o )
 {
   var self = this;
 
-  if( !self.cachingRecord )
-  return self.original.fileRecord( filePath, o );
-
   if( o === undefined )
   o = Object.create( null );
+
+  if( !self.cachingRecord )
+  return self.original.fileRecord( filePath, _.mapScreen( _.FileRecord.copyableFields, o ) );
 
   // if( !_.mapOwnKeys( o ).length )
   // o.fileProvider = self.original;
@@ -351,7 +351,7 @@ function fileRecord( filePath, o )
     }
   }
 
-  var options = _.mapExtend( {}, o );
+  var options = _.mapScreen( _.FileRecord.copyableFields, o );
   var record = self.original.fileRecord( filePath, options );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
