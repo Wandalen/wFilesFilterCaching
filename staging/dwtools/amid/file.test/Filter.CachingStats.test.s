@@ -335,6 +335,7 @@ function fileWrite( t )
 {
   var filePath = _.pathJoin( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
+  var cachingStats= _.FileFilter.Caching({ original : provider, cachingDirs : 0, cachingRecord : 0 });
 
   //
 
@@ -833,6 +834,7 @@ function fileCopy( t )
 
   cachingStats._cacheStats = {};
   dstPath = testDirectory + '_';
+  provider.fileDelete( dstPath );
   provider.fileWrite( filePath, testData );
   t.shouldThrowErrorSync( function()
   {
@@ -850,7 +852,7 @@ function fileCopy( t )
   var expected = provider.fileStat( testDirectory );
   t.identical( [ got.dev, got.ino,got.size ], [ expected.dev, expected.ino, expected.size ] );
   var got = cachingStats._cacheStats[ _.pathResolve( dstPath ) ];
-  t.identical( got, undefined );
+  t.identical( got, null );
 }
 
 //

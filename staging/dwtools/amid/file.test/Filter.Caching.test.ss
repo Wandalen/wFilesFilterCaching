@@ -115,13 +115,15 @@ function fileWatcher( t )
 
     onReady.got( function()
     {
+      debugger
       _cacheFile( caching, pathDir, true );
 
       provider.fileWrite( filePath, testData );
       onUpdate.got( function( err, got )
       {
-        //!!! some problem here with stats of dir that holds file( filePath ) stats or that directory are not updated but was cached
+        //!!! stats of a file( filePath ) and dir that holds it are not updated, but cached
         //!!! same with stats inside record
+        debugger
         var got = caching._cacheStats[ pathDir ];
         var expected = provider.fileStat( pathDir );
         t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
@@ -191,8 +193,9 @@ function fileWatcher( t )
       var data = _.strDup( testData, 8000000 );
       provider.fileWrite( filePath, data );
 
-      onUpdate.got( function()
+      onUpdate.got( function( err, got )
       {
+        debugger
         var got = caching._cacheStats[ filePath ];
         var expected = provider.fileStat( filePath );
         t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
@@ -230,14 +233,18 @@ function fileWatcher( t )
 
       onUpdate.got( ( err, got ) =>
       {
+        debugger
+
         t.identical( got.event, 'add' );
         t.identical( got.path, filePath );
 
         provider.fileCopy( dstPath, filePath );
       })
 
-      onUpdate.got( function( ere, got )
+      onUpdate.got( function( err, got )
       {
+        debugger
+
         t.identical( got.event, 'add' );
         t.identical( got.path, dstPath );
 
