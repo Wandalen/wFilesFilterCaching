@@ -57,6 +57,8 @@ function init( o )
   if( self.watchPath )
   self._createFileWatcher();
 
+  _.assert( self.original );
+
   // x
   //
   // var self = Object.create( null );
@@ -331,6 +333,10 @@ directoryReadAct.defaults.__proto__ = Partial.prototype.directoryReadAct.default
 function fileRecord( filePath, o )
 {
   var self = this;
+  debugger;
+
+  // o = o || Object.create( null );
+  // o.fileProvider =
 
   if( !self.cachingRecord )
   return _.FileRecord( filePath, o );
@@ -344,6 +350,7 @@ function fileRecord( filePath, o )
     return self._cacheRecord[ record.absolute ][ index + 1 ];
   }
 
+  debugger;
   var record = _.FileRecord( filePath, o );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
@@ -1255,11 +1262,10 @@ _.classMake
 
 //
 
-_.FileFilter.Caching = Self;
+_.FileFilter = _.FileFilter || Object.create( null );
+_.FileFilter[ Self.nameShort ] = Self;
 
 if( typeof module !== 'undefined' )
-{
-  module[ 'exports' ] = Self;
-}
+module[ 'exports' ] = Self;
 
 })();
