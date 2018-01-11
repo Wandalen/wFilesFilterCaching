@@ -338,20 +338,28 @@ function fileRecord( filePath, o )
   // o = o || Object.create( null );
   // o.fileProvider =
 
+  if( o === undefined )
+  o = Object.create( null );
+
   if( !self.cachingRecord )
-  return _.FileRecord( filePath, o );
+  return self.original.fileRecord( filePath, _.mapScreen( _.FileRecord.copyableFields, o ) );
 
-  var record = _.FileRecord._fileRecordAdjust( filePath, o );
+  // if( !_.mapOwnKeys( o ).length )
+  // o.fileProvider = self.original;
 
-  if( self._cacheRecord[ record.absolute ] !== undefined )
+  if( self._cacheRecord[ filePath ] !== undefined )
   {
-    var index = self._cacheRecord[ record.absolute ].indexOf( o );
-    if( index >= 0 )
-    return self._cacheRecord[ record.absolute ][ index + 1 ];
+    var records = self._cacheRecord[ filePath ];
+    for( var i = 0; i < records.length; i += 2 )
+    {
+      if( _.mapIdentical( records[ i ], o ) )
+      return records[ i + 1 ];
+    }
   }
 
-  debugger;
-  var record = _.FileRecord( filePath, o );
+  // var record = _.FileRecord( filePath, o );
+  var options = _.mapScreen( _.FileRecord.copyableFields, o );
+  var record = self.original.fileRecord( filePath, options );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
   self._cacheRecord[ record.absolute ].push( o, record );
@@ -397,17 +405,27 @@ function _recordUpdate( path )
 {
   var self = this;
 
-  var filePath = _.pathResolve( path );
-
-  if( self.cachingRecord )
-  if( self._cacheRecord[ filePath ] !== undefined )
+  function _update( filePath )
   {
-    for( var i = 1; i <= self._cacheRecord[ filePath ].length; i += 2 )
+    if( self._cacheRecord[ filePath ] !== undefined )
     {
-      var o = self._cacheRecord[ filePath ][ i - 1 ];
-      self._cacheRecord[ filePath ][ i ] = _.FileRecord( filePath, o );
+      for( var i = 1; i <= self._cacheRecord[ filePath ].length; i += 2 )
+      {
+        var o = self._cacheRecord[ filePath ][ i - 1 ];
+        self._cacheRecord[ filePath ][ i ] = self.original.fileRecord( filePath, o );
+      }
     }
   }
+
+  if( self.cachingRecord )
+  {
+    var filePath = _.pathResolve( path );
+    var dirPath = _.pathDir( filePath );
+
+    _update( filePath );
+    _update( dirPath );
+  }
+
 }
 
 //
@@ -425,6 +443,11 @@ function _statUpdate( path,stat )
       stat = self.original.fileStat( path );
       self._cacheStats[ filePath ] = stat;
     }
+
+    var pathDir = _.pathDir( filePath );
+
+    if( self._cacheStats[ pathDir ] !== undefined )
+    self._cacheStats[ pathDir ] = self.original.fileStat( pathDir );
   }
 }
 
@@ -508,6 +531,7 @@ function _createFileWatcher()
     var chokidar = require('chokidar');
 
     self.watchOptions.ignoreInitial = true;
+    self.watchOptions.alwaysStat = true;
     self.watchOptions.usePolling = true;
     // self.watchOptions.awaitWriteFinish =
     // {
@@ -526,12 +550,7 @@ function _createFileWatcher()
       self.fileWatcher.onReady.give( 'ready' );
     });
 
-    // self.fileWatcher.on( 'raw', function( event, path, details )
-    // {
-    //   console.log(event, path, details);
-    // })
-
-    self.fileWatcher.on( 'all', function( event, path, details )
+    self.fileWatcher.on( 'raw', function( event, path, details )
     {
       var info =
       {
@@ -539,6 +558,21 @@ function _createFileWatcher()
         path : path,
         details : details
       };
+
+      // console.log( 'raw:', _.toStr( info, { levels : 99 } ) )
+    })
+
+    self.fileWatcher.on( 'all', function( event, path, details )
+    {
+      // debugger
+      var info =
+      {
+        event : event,
+        path : path,
+        details : details
+      };
+
+      // console.log( _.toStr( info, { levels : 99 } ) )
 
       if( event === 'add' || event === 'addDir' )
       {

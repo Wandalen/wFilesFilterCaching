@@ -1,4 +1,5 @@
-# wFilesFilterCaching
+# wFilesFilterCaching [![Build Status](https://travis-ci.org/Wandalen/wFilesFilterCaching.svg?branch=master)](https://travis-ci.org/Wandalen/wFilesFilterCaching)
+
 
 Filter that works same like original provider, but additionally updates it own file stats, names and [record]( https://github.com/Wandalen/wFiles/blob/master/wFileRecord.md ) caches. Each cache is a map with file path as a key and cached data as value. Also filter can use file watcher to update cache on changes made by other processes. To perform behavior of original provider filter wraps its methods.
 
