@@ -5,29 +5,42 @@
 if( typeof module !== 'undefined' )
 {
 
-  try
+  if( typeof _global_ === 'undefined' || !_global_.wBase )
   {
-    require( '../../../Base.s' );
-  }
-  catch( err )
-  {
-    require( 'wTools' );
+    let toolsPath = '../../../../dwtools/Base.s';
+    let toolsExternal = 0;
+    try
+    {
+      require.resolve( toolsPath )/*hhh*/;
+    }
+    catch( err )
+    {
+      toolsExternal = 1;
+      require( 'wTools' );
+    }
+    if( !toolsExternal )
+    require( toolsPath )/*hhh*/;
   }
 
-  var _ = wTools;
 
-  if( !wTools.FileProvider )
+  var _ = _global_.wTools;
+
+  if( !_global_.wTools.FileProvider )
   require( 'wFiles' );
 
 }
 
-wTools.FileFilter = wTools.FileFilter || Object.create( null );
-if( wTools.FileFilter.Caching )
-return;
+var _global = _global_;
+var _ = _global_.wTools;
+_.assert( !_.FileFilter.Caching );
+
+// _.FileFilter = _.FileFilter || Object.create( null );
+// if( _.FileFilter.Caching )
+// return;
 
 //
 
-var _ = wTools;
+var _ = _global_.wTools;
 var Abstract = _.FileProvider.Abstract;
 var Partial = _.FileProvider.Partial;
 var Default = _.FileProvider.Default;
@@ -111,7 +124,7 @@ function fileStatAct( o )
     if( o.sync || o.sync === undefined )
     return stat;
     else
-    return new wConsequence().give( stat );
+    return new _.Consequence().give( stat );
   }
 
   if( self._cacheStats[ o.filePath ] !== undefined )
@@ -146,7 +159,7 @@ function fileStatAct( o )
     //     if( o.sync )
     //     return self._cacheStats[ filePath ];
     //     else
-    //     return wConsequence().give( self._cacheStats[ filePath ] );
+    //     return _.Consequence().give( self._cacheStats[ filePath ] );
     //   }
     // }
 
@@ -235,7 +248,7 @@ function directoryReadAct( o )
     if( o.sync || o.sync === undefined )
     return files;
     else
-    return new wConsequence().give( files );
+    return new _.Consequence().give( files );
   }
 
   if( self._cacheDir[ o.filePath ] !== undefined )
@@ -265,7 +278,7 @@ function directoryReadAct( o )
     //     if( o.sync )
     //     return self._cacheDir[ o.filePath ];
     //     else
-    //     return wConsequence().give( self._cacheDir[ o.filePath ] );
+    //     return _.Consequence().give( self._cacheDir[ o.filePath ] );
     //   }
     // }
 
@@ -541,8 +554,8 @@ function _createFileWatcher()
 
     self.fileWatcher = chokidar.watch( self.watchPath,self.watchOptions );
 
-    self.fileWatcher.onReady = new wConsequence();
-    self.fileWatcher.onUpdate = new wConsequence();
+    self.fileWatcher.onReady = new _.Consequence();
+    self.fileWatcher.onUpdate = new _.Consequence();
 
     if( !self.watchOptions.skipReadyEvent )
     self.fileWatcher.on( 'ready', function( path )
@@ -1292,14 +1305,22 @@ _.classMake
   extend : Proto,
 });
 
-// wCopyable.mixin( Self );
+_.Copyable.mixin( Self );
 
 //
 
 _.FileFilter = _.FileFilter || Object.create( null );
 _.FileFilter[ Self.nameShort ] = Self;
 
+// --
+// export
+// --
+
 if( typeof module !== 'undefined' )
+if( _global_._UsingWtoolsPrivately_ )
+delete require.cache[ module.id ];
+
+if( typeof module !== 'undefined' && module !== null )
 module[ 'exports' ] = Self;
 
 })();

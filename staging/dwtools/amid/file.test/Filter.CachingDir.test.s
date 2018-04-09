@@ -1094,8 +1094,8 @@ var Self =
   name : 'FileFilter.CachingDir',
   silencing : 1,
 
-  onSuiteBegin : makeTestDir,
-  onSuiteEnd : cleanTestDir,
+  onSuitBegin : makeTestDir,
+  onSuitEnd : cleanTestDir,
 
   tests :
   {
@@ -1113,7 +1113,7 @@ var Self =
 
 }
 
-Self = wTestSuite( Self )
+Self = wTestSuit( Self )
 if( typeof module !== 'undefined' && !module.parent )
 _.Tester.test( Self.name );
 
