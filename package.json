@@ -1,6 +1,6 @@
 {
   "name": "wfilesfiltercaching",
-  "version": "0.5.17",
+  "version": "0.5.18",
   "engine": "node >= 6.0.0",
   "description": "Filter for wFiles provider's that caches file stats, names and records.",
   "license": "MIT",
