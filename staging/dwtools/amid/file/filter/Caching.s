@@ -348,17 +348,13 @@ function fileRecord( filePath, o )
   var self = this;
   debugger;
 
-  // o = o || Object.create( null );
-  // o.fileProvider =
+  xxx
 
   if( o === undefined )
   o = Object.create( null );
 
   if( !self.cachingRecord )
-  return self.original.fileRecord( filePath, _.mapScreen( _.FileRecord.copyableFields, o ) );
-
-  // if( !_.mapOwnKeys( o ).length )
-  // o.fileProvider = self.original;
+  return self.original.fileRecord( filePath, _.mapOnly( o, _.FileRecord.fieldsOfCopyableGroups ) );
 
   if( self._cacheRecord[ filePath ] !== undefined )
   {
@@ -370,8 +366,7 @@ function fileRecord( filePath, o )
     }
   }
 
-  // var record = _.FileRecord( filePath, o );
-  var options = _.mapScreen( _.FileRecord.copyableFields, o );
+  var options = _.mapOnly( o, _.FileRecord.fieldsOfCopyableGroups );
   var record = self.original.fileRecord( filePath, options );
   if( !self._cacheRecord[ record.absolute ] )
   self._cacheRecord[ record.absolute ] = [];
@@ -1240,7 +1235,7 @@ var Restricts =
 }
 
 // --
-// prototype
+// define class
 // --
 
 var Extend =
