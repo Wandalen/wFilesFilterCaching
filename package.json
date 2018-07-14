@@ -4,11 +4,11 @@
   "engine": "node >= 6.0.0",
   "description": "Filter for wFiles provider's that caches file stats, names and records.",
   "license": "MIT",
-  "author": "Kostiantyn Wandalen <wtory.net@domainsbyproxy.com>",
+  "author": "Kostiantyn Wandalen <wanalen@willbe.so>",
   "contributors": [
     {
       "name": "Kostiantyn Wandalen",
-      "email": "wtory.net@domainsbyproxy.com>"
+      "email": "wanalen@willbe.so>"
     },
     {
       "name": "Ihor Ostash",
