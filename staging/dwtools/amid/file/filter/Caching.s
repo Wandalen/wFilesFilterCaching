@@ -52,7 +52,7 @@ var Self = function wFileFilterCaching( o )
   throw _.err( 'Call wFileFilterCaching without new please' );
 }
 
-Self.nameShort = 'Caching';
+Self.shortName = 'Caching';
 
 //
 
@@ -1305,7 +1305,7 @@ _.Copyable.mixin( Self );
 //
 
 _.FileFilter = _.FileFilter || Object.create( null );
-_.FileFilter[ Self.nameShort ] = Self;
+_.FileFilter[ Self.shortName ] = Self;
 
 // --
 // export
