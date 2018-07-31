@@ -70,7 +70,7 @@ function init( o )
   if( self.watchPath )
   self._createFileWatcher();
 
-  _.assert( self.original );
+  _.assert( _.objectIs( self.original ) );
 
   // x
   //
@@ -1281,7 +1281,7 @@ var Proto =
 
   //
 
-  constructor : Self,
+  /* constructor * : * Self, */
   Composes : Composes,
   Aggregates : Aggregates,
   Associates : Associates,
