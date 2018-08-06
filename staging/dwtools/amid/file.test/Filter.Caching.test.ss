@@ -18,7 +18,7 @@ if( typeof module !== 'undefined' )
 
 var _ = wTools;
 var Parent = wTools.Tester;
-var testDirectory = _.dirTempMake( _.pathJoin( __dirname, '../..' ) );
+var testDirectory = _.dirTempMake( _.join( __dirname, '../..' ) );
 
 var provider = _.fileProvider;
 var testData = 'data';
@@ -36,11 +36,11 @@ _.assert( Parent );
 
 function fileWatcher( t )
 {
-  var pathDir = provider.pathNativize( _.pathJoin( testDirectory, t.name ) );
-  provider.fileDelete( pathDir );
-  provider.directoryMake( pathDir );
-  var filePath = _.pathResolve( _.pathJoin( pathDir, 'file' ) );
-  var dstPath = _.pathResolve( _.pathJoin( pathDir, 'dst' ) );
+  var dir = provider.nativize( _.join( testDirectory, t.name ) );
+  provider.fileDelete( dir );
+  provider.directoryMake( dir );
+  var filePath = _.resolve( _.join( dir, 'file' ) );
+  var dstPath = _.resolve( _.join( dir, 'dst' ) );
 
   function _cacheFile( caching, filePath, clear )
   {
@@ -90,7 +90,7 @@ function fileWatcher( t )
         var got = caching._cacheRecord[ filePath ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
         var got = caching._cacheDir[ filePath ];
-        var expected = [ _.pathName( filePath ) ];
+        var expected = [ _.name( filePath ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -104,8 +104,8 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
-    provider.directoryMake( pathDir );
+    provider.fileDelete( dir );
+    provider.directoryMake( dir );
 
     /* write file, dir cached */
 
@@ -116,7 +116,7 @@ function fileWatcher( t )
     onReady.got( function()
     {
       debugger
-      _cacheFile( caching, pathDir, true );
+      _cacheFile( caching, dir, true );
 
       provider.fileWrite( filePath, testData );
       onUpdate.got( function( err, got )
@@ -124,13 +124,13 @@ function fileWatcher( t )
         //!!! stats of a file( filePath ) and dir that holds it are not updated, but cached
         //!!! same with stats inside record
         debugger
-        var got = caching._cacheStats[ pathDir ];
-        var expected = provider.fileStat( pathDir );
+        var got = caching._cacheStats[ dir ];
+        var expected = provider.fileStat( dir );
         t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
-        var got = caching._cacheRecord[ pathDir ][ 1 ].stat;
+        var got = caching._cacheRecord[ dir ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
-        var got = caching._cacheDir[ pathDir ];
-        var expected = [ _.pathName( filePath ) ];
+        var got = caching._cacheDir[ dir ];
+        var expected = [ _.name( filePath ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -143,7 +143,7 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
+    provider.fileDelete( dir );
     provider.fileWrite( filePath, testData );
 
     /* delete file, file cached */
@@ -177,8 +177,8 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
-    provider.directoryMake( pathDir );
+    provider.fileDelete( dir );
+    provider.directoryMake( dir );
 
     var caching = _.FileFilter.Caching({ watchPath : testDirectory });
     var onReady = caching.fileWatcher.onReady.split();
@@ -202,7 +202,7 @@ function fileWatcher( t )
         var got = caching._cacheRecord[ filePath ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
         var got = caching._cacheDir[ filePath ];
-        var expected = [ _.pathName( filePath ) ];
+        var expected = [ _.name( filePath ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -216,8 +216,8 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
-    provider.directoryMake( pathDir );
+    provider.fileDelete( dir );
+    provider.directoryMake( dir );
 
     var caching = _.FileFilter.Caching({ watchPath : testDirectory });
     var onReady = caching.fileWatcher.onReady.split();
@@ -254,7 +254,7 @@ function fileWatcher( t )
         var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
         var got = caching._cacheDir[ dstPath ];
-        var expected = [ _.pathName( dstPath ) ];
+        var expected = [ _.name( dstPath ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -268,8 +268,8 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
-    provider.directoryMake( pathDir );
+    provider.fileDelete( dir );
+    provider.directoryMake( dir );
 
     var caching = _.FileFilter.Caching({ watchPath : testDirectory });
     var onReady = caching.fileWatcher.onReady.split();
@@ -307,7 +307,7 @@ function fileWatcher( t )
         var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
         var got = caching._cacheDir[ dstPath ];
-        var expected = [ _.pathName( dstPath ) ];
+        var expected = [ _.name( dstPath ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -319,8 +319,8 @@ function fileWatcher( t )
 
   .doThen( function()
   {
-    provider.fileDelete( pathDir );
-    provider.directoryMake( pathDir );
+    provider.fileDelete( dir );
+    provider.directoryMake( dir );
 
     /* immediate writing and deleting of a file gives timeOutError becase no events emitted by chokidar */
 
@@ -330,7 +330,7 @@ function fileWatcher( t )
 
     onReady.got( function()
     {
-      var newFile = _.pathResolve( _.pathJoin( pathDir, 'new' ) );
+      var newFile = _.resolve( _.join( dir, 'new' ) );
       _cacheFile( caching, newFile, true );
 
       provider.fileWrite( newFile, testData );
@@ -350,7 +350,7 @@ function fileWatcher( t )
         var got = caching._cacheRecord[ newFile ][ 1 ].stat;
         t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
         var got = caching._cacheDir[ newFile ];
-        var expected = [ _.pathName( newFile ) ];
+        var expected = [ _.name( newFile ) ];
         t.identical( got, expected );
         caching.fileWatcher.close();
         onReady.give();
@@ -368,8 +368,8 @@ fileWatcher.timeOut = 60000;
 
 function fileWatcherOnReady( t )
 {
-  var filePath = _.pathResolve( _.pathJoin( testDirectory, 'file' ) );
-  var pathDir = provider.pathNativize( _.pathDir( filePath ) );
+  var filePath = _.resolve( _.join( testDirectory, 'file' ) );
+  var dir = provider.nativize( _.dir( filePath ) );
 
   var con = new wConsequence().give()
 
@@ -386,7 +386,7 @@ function fileWatcherOnReady( t )
     {
       t.identical( got, 'ready' );
       t.identical( caching.fileWatcher._readyEmitted, true );
-      t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+      t.shouldBe( !!caching.fileWatcher._watched[ dir ] );
     })
     return onReady;
   })
@@ -412,8 +412,8 @@ fileWatcherOnReady.timeOut = 40000;
 
 function fileWatcherOnUpdate( t )
 {
-  var filePath = _.pathResolve( _.pathJoin( testDirectory, 'file' ) );
-  var pathDir = provider.pathNativize( _.pathDir( filePath ) );
+  var filePath = _.resolve( _.join( testDirectory, 'file' ) );
+  var dir = provider.nativize( _.dir( filePath ) );
 
   var con = new wConsequence().give()
 
@@ -431,7 +431,7 @@ function fileWatcherOnUpdate( t )
     {
       t.identical( got, 'ready' );
       t.identical( caching.fileWatcher._readyEmitted, true );
-      t.shouldBe( !!caching.fileWatcher._watched[ pathDir ] );
+      t.shouldBe( !!caching.fileWatcher._watched[ dir ] );
 
       return t.shouldThrowError( onUpdate )
     })

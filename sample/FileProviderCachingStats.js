@@ -6,13 +6,13 @@ var _ = wTools;
 
 var cachingStats = _.FileFilter.Caching({ cachingDirs : 0, cachingRecord : 0 });
 
-var dir = _.pathJoin( _.pathDir( _.pathRealMainFile() ), 'cachingStatsSample' );
+var dir = _.join( _.dir( _.realMainFile() ), 'cachingStatsSample' );
 _.fileProvider.fileDelete( dir );
-var filePath = _.pathJoin( dir, 'file.txt' );
+var filePath = _.join( dir, 'file.txt' );
 
 /* get stat for current dir and cache them */
 
-var fileStatSync = cachingStats.fileStat( _.pathRealMainDir() );
+var fileStatSync = cachingStats.fileStat( _.realMainDir() );
 console.log( "\nfileStatSync: ",fileStatSync );
 console.log( "cacheStats: ",cachingStats._cacheStats );
 
@@ -62,7 +62,7 @@ console.log( "cacheStats: ",cachingStats._cacheStats );
 // cachingStats.fileStat( filePath );
 // console.log( "cacheStats: ",cachingStats._cacheStats );
 // //renaming
-// cachingStats.fileRename( _.pathJoin( dir, 'file.js' ), filePath );
+// cachingStats.fileRename( _.join( dir, 'file.js' ), filePath );
 // console.log( "cacheStats: ",cachingStats._cacheStats );
 
 /* copying invokes stats updating */
@@ -70,8 +70,8 @@ console.log( "cacheStats: ",cachingStats._cacheStats );
 // cachingStats.fileWrite( filePath, 'abc' );
 // //caching stat
 // cachingStats.fileStat( filePath );
-// cachingStats.fileStat( _.pathJoin( dir, 'file.js' ) );
+// cachingStats.fileStat( _.join( dir, 'file.js' ) );
 // console.log( "cacheStats: ",cachingStats._cacheStats );
 // //copying
-// cachingStats.fileCopy( _.pathJoin( dir, 'file.js' ), filePath );
+// cachingStats.fileCopy( _.join( dir, 'file.js' ), filePath );
 // console.log( "cacheStats: ",cachingStats._cacheStats );

@@ -1,6 +1,7 @@
 {
   "name": "wfilesfiltercaching",
   "version": "0.5.27",
+  "enabled": 0,
   "engine": "node >= 6.0.0",
   "description": "Filter for wFiles provider's that caches file stats, names and records.",
   "license": "MIT",
@@ -8,7 +9,7 @@
   "contributors": [
     {
       "name": "Kostiantyn Wandalen",
-      "email": "wanalen@willbe.so>"
+      "email": "wanalen@willbe.so"
     },
     {
       "name": "Ihor Ostash",
@@ -39,7 +40,7 @@
     "wTools": "",
     "wConsequence": "",
     "wProto": "",
-    "wPath": "",
+    "wpathfundamentals": "",
     "wRegexpObject": "",
     "fs-extra": "",
     "chokidar": ""

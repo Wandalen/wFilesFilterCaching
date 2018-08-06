@@ -6,14 +6,14 @@ var _ = wTools;
 
 var cachingDirs = _.FileFilter.Caching();
 
-var dir = _.pathJoin( _.pathDir( _.pathRealMainFile() ), 'cachingDirsSample' );
+var dir = _.join( _.dir( _.realMainFile() ), 'cachingDirsSample' );
 _.fileProvider.fileDelete( dir );
-var filePath = _.pathJoin( dir, 'file.txt' );
+var filePath = _.join( dir, 'file.txt' );
 
 /* new file */
 
 // _.fileProvider.fileWrite( filePath, 'abc' );
-// var files = cachingDirs.directoryRead( _.pathDir( _.pathRealMainFile() ) );
+// var files = cachingDirs.directoryRead( _.dir( _.realMainFile() ) );
 // var files = cachingDirs.directoryRead( filePath );
 // console.log( cachingDirs._cacheDir );
 
@@ -33,11 +33,11 @@ var filePath = _.pathJoin( dir, 'file.txt' );
 /* rename */
 
 // cachingDirs.fileWrite( filePath, 'abc' );
-// cachingDirs.fileRename( _.pathJoin( dir, 'file.js' ), dir );
+// cachingDirs.fileRename( _.join( dir, 'file.js' ), dir );
 // console.log( cachingDirs._cacheDir );
 
 /* copy */
 
 cachingDirs.fileWrite( filePath, 'abc' );
-cachingDirs.fileCopy( _.pathJoin( dir, 'file.js' ), filePath );
+cachingDirs.fileCopy( _.join( dir, 'file.js' ), filePath );
 console.log( cachingDirs._cacheDir );
