@@ -1,12 +1,17 @@
-( function _FileProvider_Caching_test_ss_( ) {
+( function _Filter_Caching_test_ss_( ) {
 
 'use strict';
 
+// !!! disabled because it is experimental functionality
+// return;
+// console.warn( 'REMINDER : fix me' );
+// !!!
+
 if( typeof module !== 'undefined' )
 {
-  require( '../file/filter/Caching.s' );
+  require( '../files/l8_filter/Caching.s' );
 
-  var _ = wTools;
+  var _ = _global_.wTools;
 
   _.include( 'wTesting' );
 
@@ -16,33 +21,35 @@ if( typeof module !== 'undefined' )
 
 //
 
-var _ = wTools;
-var Parent = wTools.Tester;
-var testDirectory = _.dirTempMake( _.join( __dirname, '../..' ) );
+var _ = _global_.wTools;
+var Parent = _.Tester;
+var testDirectory = __dirname + '/../../../../tmp.tmp/caching';
 
 var provider = _.fileProvider;
 var testData = 'data';
 
-//
-
-function cleanTestDir()
-{
-  _.fileProvider.fileDelete( testDirectory );
-}
-
-_.assert( Parent );
+_.assert( !!Parent );
 
 //
 
 function fileWatcher( t )
 {
-  var dir = provider.nativize( _.join( testDirectory, t.name ) );
-  provider.fileDelete( dir );
-  provider.directoryMake( dir );
-  var filePath = _.resolve( _.join( dir, 'file' ) );
-  var dstPath = _.resolve( _.join( dir, 'dst' ) );
+  provider.filesDelete( testDirectory );
+  provider.directoryMake( testDirectory );
+  var filePath = _.path.resolve( _.path.join( testDirectory, 'file' ) );
+  var dir = provider.pathNativize( testDirectory );
 
-  function _cacheFile( caching, filePath, clear )
+  //
+
+  t.description = 'Caching.fileWatcher test';
+
+  var caching = _.FileFilter.Caching({ watchPath : testDirectory });
+  var onReady = caching.fileWatcher.onReady.split();
+  var onUpdate = caching.fileWatcher.onUpdate;
+
+  var dstPath = _.path.resolve( _.path.join( dir, 'dst' ) );
+
+  function _cacheFile( filePath, clear )
   {
     if( clear )
     {
@@ -56,354 +63,201 @@ function fileWatcher( t )
     caching.fileRecord( filePath, { fileProvider : provider } );
   }
 
-  //
+  /* write file, file cached */
 
-  t.description = 'Caching.fileWatcher test';
-
-  var con = new wConsequence().give()
-
-  /**/
-
-  con
-  .doThen( function()
+  onReady
+  .got( function()
   {
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
-
-    /* write file, file cached */
-
-    onReady.got( function()
+    _cacheFile( filePath );
+    provider.fileWrite( filePath, testData );
+    onUpdate.got( function()
     {
-      _cacheFile( caching,filePath );
-
-      provider.fileWrite( filePath, testData );
-
-      onUpdate.got( function( err, info )
-      {
-        t.identical( info.event, 'add' );
-        t.identical( info.path, filePath );
-
-        var got = caching._cacheStats[ filePath ];
-        var expected = provider.fileStat( filePath );
-        t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
-        var got = caching._cacheRecord[ filePath ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
-        var got = caching._cacheDir[ filePath ];
-        var expected = [ _.name( filePath ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
-    });
-
-    return onReady;
+      var got = caching._cacheStats[ filePath ];
+      var expected = provider.fileStat( filePath );
+      t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
+      var got = caching._cacheRecord[ filePath ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
+      var got = caching._cacheDir[ filePath ];
+      var expected = [ _.path.name( filePath ) ];
+      t.identical( got, expected );
+      onReady.give();
+    })
   })
 
-  /**/
+  /* write file, dir cached */
 
-  .doThen( function()
+  .got( function()
   {
-    provider.fileDelete( dir );
-    provider.directoryMake( dir );
-
-    /* write file, dir cached */
-
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
-
-    onReady.got( function()
+    _cacheFile( _.path.resolve( dir ), true );
+    provider.fileWrite( filePath, testData );
+    onUpdate.got( function()
     {
-      debugger
-      _cacheFile( caching, dir, true );
-
-      provider.fileWrite( filePath, testData );
-      onUpdate.got( function( err, got )
-      {
-        //!!! stats of a file( filePath ) and dir that holds it are not updated, but cached
-        //!!! same with stats inside record
-        debugger
-        var got = caching._cacheStats[ dir ];
-        var expected = provider.fileStat( dir );
-        t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
-        var got = caching._cacheRecord[ dir ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
-        var got = caching._cacheDir[ dir ];
-        var expected = [ _.name( filePath ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
-    });
-    return onReady;
+      var dir = _.path.resolve( _.path.dir( filePath ) );
+      var got = caching._cacheStats[ dir ];
+      var expected = provider.fileStat( dir );
+      t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
+      var got = caching._cacheRecord[ dir ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino, got.isDirectory() ], [ expected.dev, expected.size, expected.ino,expected.isDirectory() ] );
+      var got = caching._cacheDir[ dir ];
+      var expected = [ _.path.name( filePath ) ];
+      t.identical( got, expected );
+      onReady.give();
+    })
   })
 
-  /**/
+  /* delete file, file cached */
 
-  .doThen( function()
+  .got( function()
   {
-    provider.fileDelete( dir );
+    _cacheFile( filePath, true );
+    provider.fileDelete( filePath );
+    onUpdate.got( function()
+    {
+      var got = caching._cacheStats[ filePath ];
+      t.identical( got, null );
+      var got = caching._cacheRecord[ filePath ][ 1 ];
+      t.identical( got, null );
+      var got = caching._cacheDir[ filePath ];
+      var expected = null;
+      t.identical( got, expected );
+      onReady.give();
+    })
+  })
+
+  /* write big file */
+
+  .got( function()
+  {
+    _cacheFile( filePath, true );
+    var data = _.strDup( testData, 8000000 );
+    provider.fileWrite( filePath, data )
+    onUpdate.got( function()
+    {
+      var got = caching._cacheStats[ filePath ];
+      var expected = provider.fileStat( filePath );
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheRecord[ filePath ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheDir[ filePath ];
+      var expected = [ _.path.name( filePath ) ];
+      t.identical( got, expected );
+      onReady.give();
+    })
+  })
+
+  /* copy file */
+
+  .got( function()
+  {
+    _cacheFile( dstPath, true );
+    provider.fileWrite( filePath, testData );
+    onUpdate.got( function()
+    {
+      provider.fileCopy( dstPath, filePath );
+    })
+    onUpdate.got( function()
+    {
+      var got = caching._cacheStats[ dstPath ];
+      var expected = provider.fileStat( dstPath );
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.path.name( dstPath ) ];
+      t.identical( got, expected );
+      onReady.give();
+    })
+  })
+
+  /* !!! onUpdate is not receiving any messages is call this case in sequence with others */
+
+  .got( function()
+  {
+    _cacheFile( dstPath, true );
+
     provider.fileWrite( filePath, testData );
 
-    /* delete file, file cached */
+    /* After fileWrite call, no events emmited by chokidar, can be fixed if add delay.
+    Problem appears if run this case in sequence with other cases
+    */
 
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
+    onUpdate = onUpdate.eitherThenSplit( _.timeOutError( 3000 ) );
+    t.mustNotThrowError( onUpdate.split() );
 
-    onReady.got( function()
+    onUpdate.got( function( err )
     {
-      _cacheFile( caching, filePath, true );
+      if( err )
+      return onReady.give();
 
-      provider.fileDelete( filePath );
-      onUpdate.got( function( err, got )
-      {
-        var got = caching._cacheStats[ filePath ];
-        t.identical( got, null );
-        var got = caching._cacheRecord[ filePath ][ 1 ];
-        t.identical( got, null );
-        var got = caching._cacheDir[ filePath ];
-        var expected = null;
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
+      provider.fileCopy( dstPath, filePath );
     })
-    return onReady;
+    onUpdate.got( function()
+    {
+      var got = caching._cacheStats[ dstPath ];
+      var expected = provider.fileStat( dstPath );
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.path.name( dstPath ) ];
+      t.identical( got, expected );
+      onReady.give();
+    })
   })
 
-  /**/
+  /* immediate writing and deleting of a file gives timeOutError becase no events emitted by chokidar */
 
-  .doThen( function()
+  .got( function()
   {
-    provider.fileDelete( dir );
-    provider.directoryMake( dir );
+    var newFile = _.path.resolve( _.path.join( dir, 'new' ) );
+    _cacheFile( newFile, true );
 
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
+    provider.fileWrite( newFile, testData );
 
-    /* write big file */
+    onUpdate = onUpdate.eitherThenSplit( _.timeOutError( 3000 ) );
+    t.mustNotThrowError( onUpdate.split() );
 
-    onReady.got( function()
+    onUpdate.got( function( err, got )
     {
-      _cacheFile( caching, filePath, true );
+      if( err )
+      return onReady.give();
 
-      var data = _.strDup( testData, 8000000 );
-      provider.fileWrite( filePath, data );
-
-      onUpdate.got( function( err, got )
-      {
-        debugger
-        var got = caching._cacheStats[ filePath ];
-        var expected = provider.fileStat( filePath );
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheRecord[ filePath ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheDir[ filePath ];
-        var expected = [ _.name( filePath ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
+      var got = caching._cacheStats[ newFile ];
+      var expected = provider.fileStat( newFile );
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheRecord[ newFile ][ 1 ].stat;
+      t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
+      var got = caching._cacheDir[ dstPath ];
+      var expected = [ _.path.name( dstPath ) ];
+      t.identical( got, expected );
+      onReady.give();
     })
 
-    return onReady;
   })
 
-  /**/
-
-  .doThen( function()
-  {
-    provider.fileDelete( dir );
-    provider.directoryMake( dir );
-
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
-
-    /* copy file */
-
-    onReady.got( function()
-    {
-      _cacheFile( caching, dstPath, true );
-
-      provider.fileWrite( filePath, testData );
-
-      onUpdate.got( ( err, got ) =>
-      {
-        debugger
-
-        t.identical( got.event, 'add' );
-        t.identical( got.path, filePath );
-
-        provider.fileCopy( dstPath, filePath );
-      })
-
-      onUpdate.got( function( err, got )
-      {
-        debugger
-
-        t.identical( got.event, 'add' );
-        t.identical( got.path, dstPath );
-
-        var got = caching._cacheStats[ dstPath ];
-        var expected = provider.fileStat( dstPath );
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheDir[ dstPath ];
-        var expected = [ _.name( dstPath ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
-    });
-
-    return onReady;
-  })
-
-  /**/
-
-  .doThen( function()
-  {
-    provider.fileDelete( dir );
-    provider.directoryMake( dir );
-
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
-
-     // /* !!! onUpdate is not receiving any messages is call this case in sequence with others */
-
-    onReady.got( function()
-    {
-
-      //  /* After fileWrite call, no events emmited by chokidar, can be fixed if add delay.
-      // Problem appears if run this case in sequence with other cases
-      // */
-
-      _cacheFile( caching, dstPath, true );
-
-      provider.fileWrite( filePath, testData );
-
-      onUpdate.got( ( err, got ) =>
-      {
-        t.identical( got.event, 'add' );
-        t.identical( got.path, filePath );
-
-        provider.fileCopy( dstPath, filePath );
-      });
-
-      onUpdate.got( ( err, got ) =>
-      {
-        t.identical( got.event, 'add' );
-        t.identical( got.path, dstPath );
-
-        var got = caching._cacheStats[ dstPath ];
-        var expected = provider.fileStat( dstPath );
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheRecord[ dstPath ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheDir[ dstPath ];
-        var expected = [ _.name( dstPath ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      });
-    })
-
-    return onReady;
-  })
-
-  .doThen( function()
-  {
-    provider.fileDelete( dir );
-    provider.directoryMake( dir );
-
-    /* immediate writing and deleting of a file gives timeOutError becase no events emitted by chokidar */
-
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady.split();
-    var onUpdate = caching.fileWatcher.onUpdate;
-
-    onReady.got( function()
-    {
-      var newFile = _.resolve( _.join( dir, 'new' ) );
-      _cacheFile( caching, newFile, true );
-
-      provider.fileWrite( newFile, testData );
-      provider.fileDelete( newFile );
-
-      onUpdate = onUpdate.eitherThenSplit( _.timeOutError( 10000 ) );
-      t.mustNotThrowError( onUpdate.split() );
-
-      onUpdate.got( function( err, got )
-      {
-        if( err )
-        return onReady.give();
-
-        var got = caching._cacheStats[ newFile ];
-        var expected = provider.fileStat( newFile );
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheRecord[ newFile ][ 1 ].stat;
-        t.identical( [ got.dev, got.size, got.ino, got.isFile() ], [ expected.dev, expected.size, expected.ino,expected.isFile() ] );
-        var got = caching._cacheDir[ newFile ];
-        var expected = [ _.name( newFile ) ];
-        t.identical( got, expected );
-        caching.fileWatcher.close();
-        onReady.give();
-      })
-    })
-    return onReady;
-  })
-
-  return con;
+  return onReady;
 }
 
-fileWatcher.timeOut = 60000;
+fileWatcher.timeOut = 40000;
+
 
 //
 
 function fileWatcherOnReady( t )
 {
-  var filePath = _.resolve( _.join( testDirectory, 'file' ) );
-  var dir = provider.nativize( _.dir( filePath ) );
+  var filePath = _.path.resolve( _.path.join( testDirectory, 'file' ) );
+  var dir = provider.pathNativize( _.path.dir( filePath ) );
 
-  var con = new wConsequence().give()
+  var caching = _.FileFilter.Caching({ watchPath : dir, watchOptions : { skipEvents : true } });
+  var onReady = caching.fileWatcher.onReady.eitherThenSplit( _.timeOutError( 30000 ) );
 
-  /**/
+  //
 
-  .doThen( function()
-  {
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady;
-
-    t.description = 'Caching.fileWatcher onReady consequence test'
-
-    onReady.doThen( ( err, got ) =>
-    {
-      t.identical( got, 'ready' );
-      t.identical( caching.fileWatcher._readyEmitted, true );
-      t.shouldBe( !!caching.fileWatcher._watched[ dir ] );
-    })
-    return onReady;
-  })
+  t.description = 'Caching.fileWatcher onReady consequence test'
 
   /**/
 
-  .doThen( function()
-  {
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory, watchOptions : { skipReadyEvent : 1 } });
-    var onReady = caching.fileWatcher.onReady.eitherThenSplit( _.timeOutError( 10000 ) )
-
-    t.description = 'Caching.fileWatcher onReady consequence test'
-
-    return t.shouldThrowError( onReady );
-  })
-
-  return con;
+  return t.shouldThrowErrorAsync( onReady );
 }
 
 fileWatcherOnReady.timeOut = 40000;
@@ -412,33 +266,27 @@ fileWatcherOnReady.timeOut = 40000;
 
 function fileWatcherOnUpdate( t )
 {
-  var filePath = _.resolve( _.join( testDirectory, 'file' ) );
-  var dir = provider.nativize( _.dir( filePath ) );
+  var filePath = _.path.resolve( _.path.join( testDirectory, 'file' ) );
+  var dir = provider.pathNativize( _.path.dir( filePath ) );
 
-  var con = new wConsequence().give()
+  var caching = _.FileFilter.Caching({ watchPath : dir, watchOptions : {} });
+  var onReady = caching.fileWatcher.onReady.split();
+  var onUpdate = caching.fileWatcher.onUpdate.eitherThenSplit( _.timeOutError( 30000 ) );
+
+  //
+
+  t.description = 'Caching.fileWatcher onUpdate consequence test'
 
   /**/
 
-  .doThen( function()
+  onReady.doThen( function( err, got )
   {
-    var caching = _.FileFilter.Caching({ watchPath : testDirectory });
-    var onReady = caching.fileWatcher.onReady;
-    var onUpdate = caching.fileWatcher.onUpdate.eitherThenSplit( _.timeOutError( 10000 ) );
+    t.identical( got, 'ready' );
 
-    t.description = 'Caching.fileWatcher onUpdate consequence test'
+    return t.shouldThrowErrorAsync( onUpdate );
+  })
 
-    onReady.doThen( ( err, got ) =>
-    {
-      t.identical( got, 'ready' );
-      t.identical( caching.fileWatcher._readyEmitted, true );
-      t.shouldBe( !!caching.fileWatcher._watched[ dir ] );
-
-      return t.shouldThrowError( onUpdate )
-    })
-    return onReady;
-  });
-
-  return con;
+  return onReady;
 }
 
 fileWatcherOnUpdate.timeOut = 40000;
@@ -446,16 +294,15 @@ fileWatcherOnUpdate.timeOut = 40000;
 //
 
 // --
-// proto
+// declare
 // --
 
 var Self =
 {
 
-  name : 'Filter.Caching',
+  name : 'Tools/mid/files/filesFilter/Caching',
   silencing : 1,
-
-  onSuitEnd : cleanTestDir,
+  enabled : 0,
 
   tests :
   {
@@ -466,7 +313,7 @@ var Self =
 
 }
 
-Self = wTestSuit( Self )
+Self = wTestSuite( Self )
 if( typeof module !== 'undefined' && !module.parent )
 _.Tester.test( Self.name );
 

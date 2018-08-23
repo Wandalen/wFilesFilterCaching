@@ -1,13 +1,20 @@
-( function _FileProvider_CachingRecord_test_ss_( ) {
+( function _Filter_CachingRecord_test_ss_( ) {
 
 'use strict';
+
+// !!! disabled because is experimental
+// return;
+// console.warn( 'REMINDER : fix me' );
+// !!!
+
 var isBrowser = true;
 if( typeof module !== 'undefined' )
 {
   isBrowser = false;
-  require( '../file/filter/Caching.s' );
 
-  var _ = wTools;
+  require( '../files/l8_filter/Caching.s' );
+
+  var _ = _global_.wTools;
 
   _.include( 'wTesting' );
 
@@ -15,53 +22,26 @@ if( typeof module !== 'undefined' )
 
 }
 
-var _ = wTools;
+var _ = _global_.wTools;
 
-var makeTestDir = function makeTestDir(){};
-var cleanTestDir = function cleanTestDir(){};
-var provider;
-
-var testDirectory;
-
-if( !isBrowser )
+if( _.FileProvider.HardDrive )
 {
-  provider = _.FileProvider.HardDrive();
-
-  makeTestDir = function makeTestDir()
-  {
-    testDirectory = _.dirTempFor
-    ({
-      packageName : Self.name,
-      packagePath : _.resolve( _.realMainDir(), '../../tmp.tmp' )
-    });
-
-    testDirectory = _.fileProvider.nativize( testDirectory );
-
-    if( _.fileProvider.fileStat( testDirectory ) )
-    _.fileProvider.fileDelete( testDirectory );
-
-    _.fileProvider.directoryMake( testDirectory );
-  }
-
-  cleanTestDir = function cleanTestDir()
-  {
-    _.fileProvider.fileDelete( testDirectory );
-  }
+  var testDirectory = __dirname + '/../../../../tmp.tmp/cachingRecord';
+  var provider = _.FileProvider.HardDrive();
 }
 else
-{
-  var testTree = {};
-  provider = _.FileProvider.SimpleStructure({ filesTree : testTree });
-  testDirectory = 'tmp.tmp/cachingRecord';
+{ var testTree = {};
+  var provider = _.FileProvider.Extract({ filesTree : testTree });
+  var testDirectory = '/tmp.tmp/cachingRecord';
 }
 
 //
 
-var _ = wTools;
-var Parent = wTools.Tester;
+var _ = _global_.wTools;
+var Parent = _.Tester;
 var o = { fileProvider : provider };
 var cachingRecord = _.FileFilter.Caching({ original : provider, cachingDirs : 0, cachingStats : 0 });
-_.assert( Parent );
+_.assert( !!Parent );
 
 //
 
@@ -70,7 +50,7 @@ function fileRead( t )
   if( !cachingRecord )
   cachingRecord = _.FileFilter.Caching({ original : provider, cachingDirs : 0, cachingStats : 0 });
 
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
 
   //
@@ -90,7 +70,7 @@ function fileRead( t )
   provider.fileWrite( filePath, testData );
   var expected = cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileRead( filePath );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
 
   /* previously cached record, file not exist */
@@ -102,7 +82,7 @@ function fileRead( t )
   {
     cachingRecord.fileRead( filePath );
   })
-  got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat, null );
 
   //
@@ -124,7 +104,7 @@ function fileRead( t )
   provider.fileWrite( filePath, testData );
   cachingRecord.fileRead( filePath );
   expected = provider.fileStat( filePath );
-  got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ].stat;
+  got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ].stat;
   t.identical( _.objectIs( got ), true );
   t.identical( [ got.dev, got.size, got.ino ], [ expected.dev, expected.size, expected.ino ] );
 
@@ -132,9 +112,9 @@ function fileRead( t )
 
   provider.fileDelete( testDirectory );
   cachingRecord.fileRecord( filePath, o );
-  var recordOptions1 = _.FileRecordOptions( o, { relative : '/X' } );
+  var recordOptions1 = _.FileRecordContext( o, { relative : '/X' } );
   cachingRecord.fileRecord( filePath, recordOptions1 );
-  var recordOptions2 = _.FileRecordOptions( o, { dir : '/a', relative : '/x'  } );
+  var recordOptions2 = _.FileRecordContext( o, { dir : '/a', relative : '/x'  } );
   cachingRecord.fileRecord( filePath, recordOptions2 );
   provider.fileWrite( filePath, testData );
   cachingRecord.fileRead( filePath );
@@ -156,7 +136,7 @@ function fileRead( t )
   {
     cachingRecord.fileRead( filePath );
   })
-  got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat, null );
 
   /* record cached, file was removed before read */
@@ -170,7 +150,7 @@ function fileRead( t )
     cachingRecord.fileRead( filePath );
   })
   var expected = null;
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat, expected );
 
   cachingRecord.updateOnRead = false;
@@ -180,7 +160,7 @@ function fileRead( t )
 
 function fileWrite( t )
 {
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
 
   //
@@ -191,8 +171,8 @@ function fileWrite( t )
 
   provider.fileDelete( testDirectory );
   cachingRecord.fileWrite( filePath, testData );
-  var dir = _.resolve( _.dir( filePath ) );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var dir = _.path.resolve( _.path.dir( filePath ) );
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 
   /* file exist in cache */
@@ -200,7 +180,7 @@ function fileWrite( t )
   provider.fileDelete( testDirectory );
   cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileWrite( filePath, testData );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( _.objectIs( got.stat ), true );
   t.identical( got.stat.isFile(), true );
 
@@ -212,7 +192,7 @@ function fileWrite( t )
   cachingRecord.fileRecord( filePath, o );
   //rewriting
   cachingRecord.fileWrite( filePath, testData + testData );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   var expected = provider.fileStat( filePath );
   t.identical( got.stat.size, expected.size )
 
@@ -223,7 +203,7 @@ function fileWrite( t )
   cachingRecord.fileWrite( filePath, testData );
   cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileWrite({ filePath : filePath, purging : 1, data : testData });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   var expected = provider.fileStat( filePath );
   t.identical([ got.stat.dev, got.stat.ino,got.stat.size ], [ expected.dev, expected.ino, expected.size ] );
 }
@@ -232,20 +212,20 @@ function fileWrite( t )
 
 function fileDelete( t )
 {
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
 
   //
 
   t.description = 'file deleting updates existing stat cache';
   cachingRecord._cacheRecord = {};
-  var dir = _.dir( filePath );
+  var dir = _.path.dir( filePath );
 
   /* file record is not cached */
 
   provider.fileWrite( filePath, testData );
   cachingRecord.fileDelete( filePath );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 
   /* file record cached before delete */
@@ -253,7 +233,7 @@ function fileDelete( t )
   provider.fileWrite( filePath, testData );
   cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileDelete( filePath );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 
   /* deleting empty folder, record cached */
@@ -263,7 +243,7 @@ function fileDelete( t )
   provider.directoryMake( dir  );
   cachingRecord.fileRecord( dir, o );
   cachingRecord.fileDelete( dir );
-  var got = cachingRecord._cacheRecord[ _.resolve( dir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dir ) ][ 1 ];
   t.identical( got, null );
 
   /* deleting folder with file, record cached */
@@ -273,9 +253,9 @@ function fileDelete( t )
   cachingRecord.fileRecord( dir, o );
   cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileDelete( dir );
-  var got = cachingRecord._cacheRecord[ _.resolve( dir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dir ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 }
 
@@ -283,7 +263,7 @@ function fileDelete( t )
 
 function directoryMake( t )
 {
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
 
   //
@@ -295,7 +275,7 @@ function directoryMake( t )
 
   provider.fileDelete( testDirectory );
   cachingRecord.directoryMake( testDirectory );
-  var got = cachingRecord._cacheRecord[ _.resolve( testDirectory ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ];
   t.identical( got, undefined );
 
   /* rewritingTerminal disabled */
@@ -303,7 +283,7 @@ function directoryMake( t )
   cachingRecord._cacheRecord = {};
   provider.fileDelete( testDirectory );
   cachingRecord.directoryMake({ filePath : testDirectory, rewritingTerminal : 0 });
-  var got = cachingRecord._cacheRecord[ _.resolve( testDirectory ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ];
   t.identical( got, undefined );
 
   /* rewritingTerminal enabled, update of existing file cache */
@@ -312,10 +292,10 @@ function directoryMake( t )
   provider.fileDelete( testDirectory );
   provider.fileWrite( filePath, testData );
   cachingRecord.fileRecord( filePath, o );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat.isFile(), true  );
   cachingRecord.directoryMake( filePath );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat.isDirectory(), true );
 
   /* rewritingTerminal disable, file prevents dir creation */
@@ -328,7 +308,7 @@ function directoryMake( t )
   {
     cachingRecord.directoryMake({ filePath : filePath, rewritingTerminal : 0 });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
 
   /* force disabled  */
@@ -339,7 +319,7 @@ function directoryMake( t )
   {
     cachingRecord.directoryMake({ filePath : filePath, force : 0 });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 
   /* force and rewritingTerminal disabled */
@@ -350,7 +330,7 @@ function directoryMake( t )
   {
     cachingRecord.directoryMake({ filePath : filePath, force : 0, rewritingTerminal : 0 });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 }
 
@@ -358,7 +338,7 @@ function directoryMake( t )
 
 function fileRename( t )
 {
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
 
   //
@@ -379,7 +359,7 @@ function fileRename( t )
       throwing : 1,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 
   /* src not exist, no changes in cache */
@@ -397,7 +377,7 @@ function fileRename( t )
       throwing : 1,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
 
   /**/
@@ -412,7 +392,7 @@ function fileRename( t )
     rewriting : 1,
     throwing : 0,
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
 
   /* src not exist, no changes in cache */
@@ -431,13 +411,13 @@ function fileRename( t )
       throwing : 0,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
 
   //
 
   t.description = 'rename in same directory';
-  var dstPath = _.join( testDirectory,'_file' );
+  var dstPath = _.path.join( testDirectory,'_file' );
 
   /* dst not exist */
 
@@ -450,7 +430,7 @@ function fileRename( t )
     srcPath : filePath,
     dstPath : dstPath,
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 
   /* rewriting existing dst*/
@@ -467,164 +447,138 @@ function fileRename( t )
     dstPath : dstPath,
     rewriting : 1
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ][ 1 ];
   t.identical( got, null );
 
   //
 
   t.description = 'rename dir';
-  var dstPath = _.join( testDirectory,'_file' );
+  var dstPath = _.path.join( testDirectory,'_file' );
 
   /* dst not exist */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  provider.fileWrite( srcFile, testData );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
-  cachingRecord.fileRecord( _.resolve( srcDir ), o );
+  cachingRecord.fileRecord( filePath, o );
+  cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
   cachingRecord.fileRename
   ({
-    srcPath : srcDir,
-    dstPath : dstDir,
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( dstDir ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory + '_' ) ];
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcFile ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 
 
   /* dst is empty dir */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  provider.fileWrite( srcFile, testData );
-  provider.directoryMake( dstDir );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
+  provider.directoryMake( testDirectory + '_' );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
-  cachingRecord.fileRecord( _.resolve( srcDir ), o );
-  cachingRecord.fileRecord( _.resolve( dstDir ), o );
+  cachingRecord.fileRecord( filePath, o );
+  cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
+  cachingRecord.fileRecord( _.path.resolve( testDirectory + '_' ), o );
   cachingRecord.fileRename
   ({
-    srcPath : srcDir,
-    dstPath : dstDir,
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
     rewriting : 1,
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( dstDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory + '_' ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcFile ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 
   /* dst is dir with files */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  var dstFile = _.join( srcDir, 'dstFile' );
-  provider.fileWrite( srcFile, testData );
-  provider.fileWrite( dstFile, testData );
-  provider.directoryMake( dstDir );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
+  provider.fileWrite( _.path.join( testDirectory + '_', 'file' ), testData );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
-  cachingRecord.fileRecord( dstFile, o );
-  cachingRecord.fileRecord( _.resolve( srcDir ), o );
-  cachingRecord.fileRecord( _.resolve( dstDir ), o );
+  cachingRecord.fileRecord( filePath, o );
+  cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
+  cachingRecord.fileRecord( _.path.resolve( testDirectory + '_' ), o );
+  cachingRecord.fileRecord( _.path.join( testDirectory + '_', 'file' ), o );
   cachingRecord.fileRename
   ({
-    srcPath : srcDir,
-    dstPath : dstDir,
-    rewriting : 1,
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
+    rewriting : 1
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( dstDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory + '_' ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( srcFile ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 
   /* dst is dir with files, rewriting off, error expected, src/dst must not be changed */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  var dstFile = _.join( srcDir, 'dstFile' );
-  provider.fileWrite( srcFile, testData );
-  provider.fileWrite( dstFile, testData );
-  provider.directoryMake( dstDir );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
+  provider.fileWrite( _.path.join( testDirectory + '_', 'file' ), testData );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
-  cachingRecord.fileRecord( dstFile, o );
-  var expected1 = cachingRecord.fileRecord( _.resolve( srcDir ), o );
-  var expected2 = cachingRecord.fileRecord( _.resolve( dstDir ), o );
-  t.shouldThrowError( () =>
+  var expected1 = cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
+  var expected2 = cachingRecord.fileRecord( _.path.resolve( testDirectory + '_' ), o );
+  t.shouldThrowErrorSync( function()
   {
     cachingRecord.fileRename
     ({
-      srcPath : srcDir,
-      dstPath : dstDir,
+      srcPath : testDirectory,
+      dstPath : testDirectory + '_',
     });
   })
-
-  var got = cachingRecord._cacheRecord[ _.resolve( srcDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstDir) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory + '_' ) ][ 1 ];
   t.identical( got, expected2 );
 
   /* dst is dir with files, rewriting off, throwing off, src/dst must not be changed */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  var dstFile = _.join( srcDir, 'dstFile' );
-  provider.fileWrite( srcFile, testData );
-  provider.fileWrite( dstFile, testData );
-  provider.directoryMake( dstDir );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
+  provider.fileWrite( _.path.join( testDirectory + '_', 'file' ), testData );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
-  cachingRecord.fileRecord( dstFile, o );
-  var expected1 = cachingRecord.fileRecord( _.resolve( srcDir ), o );
-  var expected2 = cachingRecord.fileRecord( _.resolve( dstDir ), o );
-  t.mustNotThrowError( () =>
+  var expected1 = cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
+  var expected2 = cachingRecord.fileRecord( _.path.resolve( testDirectory + '_' ), o );
+  t.mustNotThrowError( function()
   {
     cachingRecord.fileRename
     ({
-      srcPath : srcDir,
-      dstPath : dstDir,
+      srcPath : testDirectory,
+      dstPath : testDirectory + '_',
       throwing : 0
     });
   })
-
-  var got = cachingRecord._cacheRecord[ _.resolve( srcDir ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstDir) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory + '_' ) ][ 1 ];
   t.identical( got, expected2 );
 
   /* dst exist, record of file from src dir is cached before rename, must be deleted  */
 
-  var srcDir = _.join( testDirectory, 'srcDir' );
-  var dstDir = _.join( testDirectory, 'dstDir' );
-  var srcFile = _.join( srcDir, 'srcFile' );
-  var dstFile = _.join( srcDir, 'dstFile' );
-
-  provider.fileWrite( srcFile, testData );
-  provider.fileWrite( dstFile, testData );
+  provider.fileDelete( _.path.dir( testDirectory ) );
+  provider.fileWrite( filePath, testData );
+  provider.fileWrite( _.path.join( testDirectory + '_', 'file' ), testData );
   cachingRecord._cacheRecord = {};
-  cachingRecord.fileRecord( srcFile, o );
+  cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileRename
   ({
-    srcPath : srcDir,
-    dstPath : dstDir,
+    srcPath : testDirectory,
+    dstPath : testDirectory + '_',
     rewriting : 1
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( srcFile ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
 }
 
@@ -632,7 +586,7 @@ function fileRename( t )
 
 function fileCopy( t )
 {
-  var filePath = _.join( testDirectory,'file' );
+  var filePath = _.path.join( testDirectory,'file' );
   var testData = 'Lorem ipsum dolor sit amet';
   provider.fileDelete( testDirectory );
 
@@ -654,7 +608,7 @@ function fileCopy( t )
       throwing : 1,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   var expected = undefined;
   t.identical( got, expected );
 
@@ -672,7 +626,7 @@ function fileCopy( t )
       throwing : 1,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
 
   /**/
@@ -706,15 +660,15 @@ function fileCopy( t )
       throwing : 0,
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
-  var got = cachingRecord._cacheRecord[ _.resolve( ' ' ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( ' ' ) ];
   t.identical( got, undefined );
 
   //
 
   t.description = 'dst not exist';
-  var dstPath = _.join( testDirectory, 'dst' );
+  var dstPath = _.path.join( testDirectory, 'dst' );
 
   /* file, updateOnRead disabled */
 
@@ -729,9 +683,9 @@ function fileCopy( t )
     rewriting : 1,
     throwing : 1,
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ];
   t.identical( got, undefined );
 
   /* file, updateOnRead enabled */
@@ -749,17 +703,17 @@ function fileCopy( t )
     throwing : 1,
   });
   cachingRecord.updateOnRead = 0;
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   var expected = provider.fileStat( filePath );
   if( got.stat.atime )
   t.identical( got.stat.atime.getTime(), expected.atime.getTime() );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ];
   t.identical( got, undefined );
 
   /* file, rewriting dst - terminal file  */
 
   cachingRecord._cacheRecord = {};
-  var dstPath = _.join( testDirectory, 'dst' );
+  var dstPath = _.path.join( testDirectory, 'dst' );
   provider.fileWrite( filePath, testData );
   provider.fileWrite( dstPath, testData + testData );
   var expected = cachingRecord.fileRecord( filePath, o );
@@ -772,15 +726,15 @@ function fileCopy( t )
     rewriting : 1,
     throwing : 1,
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ];
   t.identical( got, undefined );
 
   /* file, rewriting dst - terminal file, rewriting off  */
 
   cachingRecord._cacheRecord = {};
-  var dstPath = _.join( testDirectory, 'dst' );
+  var dstPath = _.path.join( testDirectory, 'dst' );
   provider.fileWrite( filePath, testData );
   provider.fileWrite( dstPath, testData + testData );
   var expected1 = cachingRecord.fileRecord( filePath, o );
@@ -796,21 +750,20 @@ function fileCopy( t )
       throwing : 1,
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ][ 1 ];
   t.identical( got, expected2 );
 
   /* copy folder */
 
   cachingRecord._cacheRecord = {};
   dstPath = testDirectory + '_';
-  var expected1 = cachingRecord.fileRecord( _.resolve( testDirectory ), o );
-  var expected2 = cachingRecord.fileRecord( _.resolve( dstPath ), o );
+  var expected1 = cachingRecord.fileRecord( _.path.resolve( testDirectory ), o );
+  var expected2 = cachingRecord.fileRecord( _.path.resolve( dstPath ), o );
   provider.fileWrite( filePath, testData );
   t.shouldThrowErrorSync( function()
   {
-    debugger
     cachingRecord.fileCopy
     ({
       srcPath : testDirectory,
@@ -820,10 +773,9 @@ function fileCopy( t )
       throwing : 1,
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( testDirectory ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( testDirectory ) ][ 1 ];
   t.identical( got, expected1 );
-  console.log( dstPath )
-  var got = cachingRecord._cacheRecord[ _.resolve( dstPath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( dstPath ) ][ 1 ];
   t.identical( got, expected2 );
 
 }
@@ -832,8 +784,8 @@ function fileCopy( t )
 
 function fileExchange( t )
 {
-  var filePath = _.join( testDirectory,'file' );
-  var filePath2 = _.join( testDirectory + '_','file2' );
+  var filePath = _.path.join( testDirectory,'file' );
+  var filePath2 = _.path.join( testDirectory + '_','file2' );
   var testData = 'Lorem ipsum dolor sit amet';
   provider.fileDelete( testDirectory );
 
@@ -848,9 +800,9 @@ function fileExchange( t )
   var expected1 = cachingRecord.fileRecord( filePath, o );
   var expected2 = cachingRecord.fileRecord( filePath2, o );
   cachingRecord.fileExchange( filePath2, filePath );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got.stat.size, expected2.stat.size );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( got.stat.size, expected1.stat.size );
 
   //
@@ -865,16 +817,16 @@ function fileExchange( t )
   provider.fileWrite( filePath2, testData + testData );
   cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileRecord( filePath2, o );
-  var expected1 = cachingRecord.fileRecord( _.dir( filePath ), o );
-  var expected2 = cachingRecord.fileRecord( _.dir( filePath2 ), o );
-  cachingRecord.fileExchange( _.dir( filePath2 ), _.dir( filePath ) );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var expected1 = cachingRecord.fileRecord( _.path.dir( filePath ), o );
+  var expected2 = cachingRecord.fileRecord( _.path.dir( filePath2 ), o );
+  cachingRecord.fileExchange( _.path.dir( filePath2 ), _.path.dir( filePath ) );
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve(  filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve(  filePath2 ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( _.dir( filePath ) ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( _.path.dir( filePath ) ) ][ 1 ];
   t.identical( [ got.stat.dev, got.stat.ino,got.stat.size ], [ expected2.stat.dev, expected2.stat.ino, expected2.stat.size ] );
-  var got = cachingRecord._cacheRecord[ _.resolve( _.dir( filePath2 ) ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( _.path.dir( filePath2 ) ) ][ 1 ];
   t.identical( [ got.stat.dev, got.stat.ino,got.stat.size ], [ expected1.stat.dev, expected1.stat.ino, expected1.stat.size ] );
 
   //
@@ -884,7 +836,7 @@ function fileExchange( t )
   /* allowMissing off, throwing on */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.shouldThrowErrorSync( function()
   {
     cachingRecord.fileExchange
@@ -895,15 +847,15 @@ function fileExchange( t )
       allowMissing : 0
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /* allowMissing off, throwing off */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.mustNotThrowError( function()
   {
     cachingRecord.fileExchange
@@ -914,15 +866,15 @@ function fileExchange( t )
       allowMissing : 0
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /* allowMissing off, throwing on, src cached */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   var expected = cachingRecord.fileRecord( filePath, o );
   t.shouldThrowErrorSync( function()
   {
@@ -934,16 +886,16 @@ function fileExchange( t )
       allowMissing : 0
     });
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /* allowMissing on, throwing on */
 
   cachingRecord._cacheRecord = {};
-  var filePath2 = _.join( testDirectory, 'file2' )
-  provider.fileDelete( _.dir( testDirectory ) );
+  var filePath2 = _.path.join( testDirectory, 'file2' )
+  provider.fileDelete( _.path.dir( testDirectory ) );
   provider.fileWrite( filePath2, testData + testData );
   cachingRecord.fileRecord( filePath, o );
   var expected = cachingRecord.fileRecord( filePath2, o );
@@ -954,20 +906,20 @@ function fileExchange( t )
     throwing : 1,
     allowMissing : 1
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( [ got.stat.dev, got.stat.ino, got.stat.size ], [ expected.stat.dev, expected.stat.ino, expected.stat.size ] );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( got, null );
 
   //
 
   t.description = 'dst not exist';
-  var filePath2 = _.join( testDirectory, 'file2' );
+  var filePath2 = _.path.join( testDirectory, 'file2' );
 
   /**/
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   provider.fileWrite( filePath, testData );
   var expected = cachingRecord.fileRecord( filePath, o );
   cachingRecord.fileRecord( filePath2, o );
@@ -978,15 +930,15 @@ function fileExchange( t )
     throwing : 1,
     allowMissing : 1
   });
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, null );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( [ got.stat.dev, got.stat.ino, got.stat.size ], [ expected.stat.dev, expected.stat.ino, expected.stat.size ] );
 
   /**/
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   provider.fileWrite( filePath, testData );
   var expected1 = cachingRecord.fileRecord( filePath, o );
   var expected2 = cachingRecord.fileRecord( filePath2, o );
@@ -1000,15 +952,15 @@ function fileExchange( t )
       allowMissing : 0
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( got, expected2 );
 
   /**/
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   provider.fileWrite( filePath, testData );
   var expected1 = cachingRecord.fileRecord( filePath, o );
   var expected2 = cachingRecord.fileRecord( filePath2, o );
@@ -1022,20 +974,20 @@ function fileExchange( t )
       allowMissing : 0
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( got, expected2 );
 
   //
 
   t.description = 'src & dst not exist';
-  var filePath2 = _.join( testDirectory, 'file2' );
+  var filePath2 = _.path.join( testDirectory, 'file2' );
 
   /**/
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.mustNotThrowError( function()
   {
     cachingRecord.fileExchange
@@ -1046,16 +998,16 @@ function fileExchange( t )
       allowMissing : 1
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /**/
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   var expected1 = cachingRecord.fileRecord( filePath, o );
   var expected2 = cachingRecord.fileRecord( filePath2, o );
   t.mustNotThrowError( function()
@@ -1068,9 +1020,9 @@ function fileExchange( t )
       allowMissing : 1
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ][ 1 ];
   t.identical( got, expected1 );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ][ 1 ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ][ 1 ];
   t.identical( got, expected2 );
 
 
@@ -1078,7 +1030,7 @@ function fileExchange( t )
   /* throwing 0, allowMissing 1 */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.mustNotThrowError( function()
   {
     cachingRecord.fileExchange
@@ -1089,16 +1041,16 @@ function fileExchange( t )
       allowMissing : 1
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /* throwing 1, allowMissing 0 */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.shouldThrowErrorSync( function()
   {
     cachingRecord.fileExchange
@@ -1109,16 +1061,16 @@ function fileExchange( t )
       allowMissing : 0
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
 
   /* throwing 0, allowMissing 0 */
 
   cachingRecord._cacheRecord = {};
-  provider.fileDelete( _.dir( testDirectory ) );
+  provider.fileDelete( _.path.dir( testDirectory ) );
   t.mustNotThrowError( function()
   {
     cachingRecord.fileExchange
@@ -1129,149 +1081,24 @@ function fileExchange( t )
       allowMissing : 0
     });
   })
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath ) ];
   var expected = provider.fileStat( filePath );
   t.identical( got, undefined );
-  var got = cachingRecord._cacheRecord[ _.resolve( filePath2 ) ];
+  var got = cachingRecord._cacheRecord[ _.path.resolve( filePath2 ) ];
   t.identical( got, undefined );
-
-}
-
-function fileRecord( test )
-{
-  var cachingRecord = _.FileFilter.Caching({ original : provider, cachingDirs : 0, cachingStats : 0 });
-  var dir = testDirectory;
-  var fileRecord = _.routineJoin( cachingRecord, cachingRecord.fileRecord );
-  var filePath,got;
-
-  _.fileProvider.directoryMake( testDirectory );
-
-  function check( got, path, o )
-  {
-    var name = _.name( path );
-    var ext = _.ext( path );
-    var stat = _.fileProvider.fileStat( path );
-
-    test.identical( got.absolute, path );
-
-    if( o && o.dir === path )
-    test.identical( got.relative, '.' );
-    else
-    test.identical( got.relative, _.dot( _.relative( o.dir, path ) ) );
-
-    test.identical( got.ext, ext );
-    test.identical( got.extWithDot, '.' + ext );
-
-    test.identical( got.name, name );
-    test.identical( got.nameWithExt, name + '.' + ext );
-
-    if( stat )
-    test.identical( got.stat.size, stat.size );
-    else
-    test.identical( got.stat, null );
-  }
-
-  //
-
-  test.description = 'dir/relative options';
-  var recordOptions = { dir : dir };
-
-  /*absolute path, not exist*/
-
-  filePath = _.join( dir, 'invalid.txt' );
-  var got = fileRecord( filePath,recordOptions );
-  check( got, filePath, recordOptions );
-  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
-  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
-
-  /*absolute path, terminal file*/
-
-  filePath = _.realMainFile();
-  var got = fileRecord( filePath,recordOptions );
-  check( got, filePath, recordOptions );
-  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
-  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
-
-  /*absolute path, dir*/
-
-  filePath = dir;
-  var got = fileRecord( filePath,recordOptions );
-  check( got, filePath,recordOptions );
-  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
-  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
-
-
-  /*absolute path, change dir to it root, filePath - dir*/
-
-  debugger
-  filePath = dir;
-  cachingRecord._cacheRecord = Object.create( null );
-  var recordOptions = { dir : _.dir( dir ) };
-  var got = fileRecord( filePath,recordOptions );
-  check( got, filePath,recordOptions );
-  test.identical( recordOptions, cachingRecord._cacheRecord[ filePath ][ 0 ] );
-  test.identical( got, cachingRecord._cacheRecord[ filePath ][ 1 ] );
-  test.identical( got.stat.isDirectory(), true )
-  test.identical( got.isDirectory, true );
-  test.identical( got._isDir(), true );
-
-
-  test.description = 'same filePath, different options';
-  filePath = dir;
-  cachingRecord._cacheRecord = Object.create( null );
-  var recordOptions = { dir : _.dir( dir ) };
-  var options =
-  [
-    { relative : _.dir( dir ) },
-    { relative : _.dir( _.dir( dir ) ) },
-    { relative : '/X' }
-  ]
-  options.forEach( ( o ) =>
-  {
-    fileRecord( filePath, o );
-  })
-
-  /* records must be cached */
-
-  test.identical( cachingRecord._cacheRecord[ filePath ].length / 2, options.length );
-
-  options.forEach( ( o ) =>
-  {
-    var got = fileRecord( filePath, o );
-    var i = cachingRecord._cacheRecord[ filePath ].indexOf( o );
-    test.shouldBe( i !== -1 );
-    var i = cachingRecord._cacheRecord[ filePath ].indexOf( got );
-    test.shouldBe( i !== -1 );
-  })
-
-  //
-
-  test.description = 'changing cachingRecord option';
-  cachingRecord.cachingRecord = 0;
-  cachingRecord._cacheRecord = Object.create( null );
-  debugger
-  fileRecord( filePath );
-  test.identical( cachingRecord._cacheRecord, Object.create( null ) );
-  cachingRecord.cachingRecord = 1;
-  var got = fileRecord( filePath );
-  var i = cachingRecord._cacheRecord[ filePath ].indexOf( got );
-  test.shouldBe( i !== -1 );
-
 
 }
 
 // --
-// proto
+// declare
 // --
 
 var Self =
 {
 
-  name : 'FileFilter.CachingRecord',
+  name : 'Tools/mid/files/filesFilter/CachingRecords',
   silencing : 1,
-
-  onSuitBegin : makeTestDir,
-  onSuitEnd : cleanTestDir,
+  enabled : 0, // !!!
 
   tests :
   {
@@ -1282,12 +1109,11 @@ var Self =
     fileRename : fileRename,
     fileCopy : fileCopy,
     fileExchange : fileExchange,
-    fileRecord : fileRecord
   },
 
 }
 
-Self = wTestSuit( Self )
+Self = wTestSuite( Self )
 if( typeof module !== 'undefined' && !module.parent )
 _.Tester.test( Self.name );
 
