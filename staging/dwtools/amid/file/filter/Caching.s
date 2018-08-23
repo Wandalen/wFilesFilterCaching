@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 
   if( typeof _global_ === 'undefined' || !_global_.wBase )
   {
-    let toolsPath = '../../../dwtools/Base.s';
+    let toolsPath = '../../../../dwtools/Base.s';
     let toolsExternal = 0;
     try
     {
@@ -21,17 +21,17 @@ if( typeof module !== 'undefined' )
     if( !toolsExternal )
     require( toolsPath );
   }
-
-
-  var _global = _global_; var _ = _global_.wTools;
+  var _global = _global_;
+  var _ = _global_.wTools;
 
   if( !_global_.wTools.FileProvider )
-  require( 'wFiles' );
+  _.include( 'wFiles' );
 
 }
 
 var _global = _global_;
-var _global = _global_; var _ = _global_.wTools;
+var _global = _global_;
+var _ = _global_.wTools;
 _.assert( !_.FileFilter.Caching );
 
 // _.FileFilter = _.FileFilter || Object.create( null );
@@ -39,8 +39,8 @@ _.assert( !_.FileFilter.Caching );
 // return;
 
 //
-
-var _global = _global_; var _ = _global_.wTools;
+var _global = _global_;
+var _ = _global_.wTools;
 var Abstract = _.FileProvider.Abstract;
 var Partial = _.FileProvider.Partial;
 var Default = _.FileProvider.Default;
@@ -108,13 +108,13 @@ function fileStatAct( o )
 
   if( !self.cachingStats )
   {
-    // o.filePath = self.nativize( o.filePath );
+    // o.filePath = self.pathNativize( o.filePath );
     return self.original.fileStatAct( o );
   }
 
   // var original = self.original.fileStatAct;
 
-  // var o = _._fileOptionsGet.apply( original,arguments );
+  // var o = _.files._fileOptionsGet.apply( original,arguments );
   // var filePath = o;
 
   // debugger;
@@ -133,7 +133,7 @@ function fileStatAct( o )
   }
   else
   {
-    var filePath = _.path.resolve( o.filePath );
+    var filePath = self.path.resolve( o.filePath );
     if( self._cacheStats[ filePath ] !== undefined )
     {
       return handleEnd( self._cacheStats[ filePath ] );
@@ -141,7 +141,7 @@ function fileStatAct( o )
 
     // if( _.strIs( o ) )
     // {
-    //   o = _.path.resolve( o );
+    //   o = self.path.resolve( o );
     //   if( self._cacheStats[ o ] !== undefined )
     //   return  self._cacheStats[ o ];
     // }
@@ -149,11 +149,11 @@ function fileStatAct( o )
     // if( _.objectIs( o ) )
     // {
     //   o = _.routineOptions( fileStatAct,o )
-    //   o = _.path.resolve( o );
+    //   o = self.path.resolve( o );
     //   if( o.sync === undefined )
     //   o.sync = 1;
     //
-    //   o.filePath = _.path.resolve( o.filePath );
+    //   o.filePath = self.path.resolve( o.filePath );
     //   if( self._cacheStats[ filePath ] )
     //   {
     //     if( o.sync )
@@ -165,9 +165,9 @@ function fileStatAct( o )
 
     // console.log( 'fileStatAct' );
 
-    // o.filePath = self.nativize( o.filePath );
+    // o.filePath = self.pathNativize( o.filePath );
     var stat = self.original.fileStatAct( o );
-    // o.filePath = _.path.resolve( o.filePath );
+    // o.filePath = self.path.resolve( o.filePath );
 
 
     // console.log( o );
@@ -232,13 +232,13 @@ function directoryReadAct( o )
 
   if( !self.cachingDirs )
   {
-    // o.filePath = self.nativize( o.filePath );
+    // o.filePath = self.pathNativize( o.filePath );
     return self.original.directoryReadAct( o );
   }
 
   // var original = self.original.directoryReadAct;
 
-  // var o = _._fileOptionsGet.apply( original,arguments );
+  // var o = _.files._fileOptionsGet.apply( original,arguments );
   // var filePath = o;
 
   // debugger;
@@ -257,22 +257,22 @@ function directoryReadAct( o )
   }
   else
   {
-    var filePath = _.path.resolve( o.filePath );
+    var filePath = self.path.resolve( o.filePath );
     if( self._cacheDir[ filePath ] !== undefined )
     return handleEnd( self._cacheDir[ filePath ] );
 
 
     // if( _.strIs( o ) )
     // {
-    //   o = _.path.resolve( o );
+    //   o = self.path.resolve( o );
     //   if( self._cacheDir[ o ] !== undefined )
     //   return  self._cacheDir[ o ];
     // }
     // else if( _.objectIs( o ) )
     // {
     //   o = _.routineOptions( directoryReadAct,o )
-    //   // o = _.path.resolve( o );
-    //   o.filePath = _.path.resolve( o.filePath );
+    //   // o = self.path.resolve( o );
+    //   o.filePath = self.path.resolve( o.filePath );
     //   if( self._cacheDir[ o.filePath ] )
     //   {
     //     if( o.sync )
@@ -283,9 +283,9 @@ function directoryReadAct( o )
     // }
 
     // console.log( 'directoryReadAct' );
-    // o.filePath = self.nativize( o.filePath );
+    // o.filePath = self.pathNativize( o.filePath );
     var files = self.original.directoryReadAct.call( self, o );
-    // o.filePath = _.path.resolve( o.filePath );
+    // o.filePath = self.path.resolve( o.filePath );
 
     // console.log( o );
 
@@ -387,13 +387,13 @@ function _dirUpdate( filePath )
   if( !self.cachingDirs )
   return;
 
-  filePath = _.path.resolve( filePath );
+  filePath = self.path.resolve( filePath );
 
   if( self._cacheDir[ filePath ] !== undefined )
   self._cacheDir[ filePath ] = self.original.directoryRead( filePath );
 
-  var dirPath = _.path.dir( filePath );
-  var fileName = _.path.name({ path : filePath, withExtension : 1 });
+  var dirPath = self.path.dir( filePath );
+  var fileName = self.path.name({ path : filePath, withExtension : 1 });
 
   var dir = self._cacheDir[ dirPath ];
 
@@ -427,8 +427,8 @@ function _recordUpdate( path )
 
   if( self.cachingRecord )
   {
-    var filePath = _.path.resolve( path );
-    var dirPath = _.path.dir( filePath );
+    var filePath = self.path.resolve( path );
+    var dirPath = self.path.dir( filePath );
 
     _update( filePath );
     _update( dirPath );
@@ -442,7 +442,7 @@ function _statUpdate( path,stat )
 {
   var self = this;
 
-  var filePath = _.path.resolve( path );
+  var filePath = self.path.resolve( path );
   if( self.cachingStats )
   {
     if( self._cacheStats[ filePath ] !== undefined )
@@ -452,7 +452,7 @@ function _statUpdate( path,stat )
       self._cacheStats[ filePath ] = stat;
     }
 
-    var dir = _.path.dir( filePath );
+    var dir = self.path.dir( filePath );
 
     if( self._cacheStats[ dir ] !== undefined )
     self._cacheStats[ dir ] = self.original.fileStat( dir );
@@ -465,13 +465,13 @@ function _removeFromCache( path )
 {
   var self = this;
 
-  var filePath = _.path.resolve( path );
+  var filePath = self.path.resolve( path );
 
   function _removeChilds( cache )
   {
     var files = Object.keys( cache );
     for( var i = 0; i < files.length; i++  )
-    if( _.path.dir( files[ i ] ) === filePath )
+    if( self.path.dir( files[ i ] ) === filePath )
     cache[ files[ i ] ] = null;
     // delete cache[ files[ i ] ];
   }
@@ -515,8 +515,8 @@ function _removeFromCache( path )
       // delete self._cacheDir[ filePath ];
     }
 
-    var dir = _.path.dir( filePath );
-    var fileName = _.path.name({ path : filePath, withExtension : 1 });
+    var dir = self.path.dir( filePath );
+    var fileName = self.path.name({ path : filePath, withExtension : 1 });
     var dir = self._cacheDir[ dir ];
     if( dir )
     {
@@ -751,7 +751,7 @@ function fileTimeSetAct( o )
 
   var result = self.original.fileTimeSetAct( o );
 
-  var filePath = _.path.resolve( o.filePath );
+  var filePath = self.path.resolve( o.filePath );
 
   if( self.cachingStats )
   {
@@ -868,8 +868,8 @@ function fileRenameAct( o )
     if( o.dstPath === o.srcPath )
     return;
 
-    var srcPath = _.path.resolve( o.srcPath );
-    var dstPath = _.path.resolve( o.dstPath );
+    var srcPath = self.path.resolve( o.srcPath );
+    var dstPath = self.path.resolve( o.dstPath );
 
     if( self.cachingStats )
     if( self._cacheStats[ srcPath ] )
@@ -892,27 +892,27 @@ function fileRenameAct( o )
 
     if( self.cachingDirs )
     {
-      var srcPath = _.path.resolve( o.srcPath );
+      var srcPath = self.path.resolve( o.srcPath );
       self._removeFromCache( o.srcPath );
-      if( self._cacheDir[ _.path.resolve( o.srcPath ) ] !== undefined )
-      self._cacheDir[ _.path.resolve( o.dstPath ) ] = null;
+      if( self._cacheDir[ self.path.resolve( o.srcPath ) ] !== undefined )
+      self._cacheDir[ self.path.resolve( o.dstPath ) ] = null;
       self._dirUpdate( o.dstPath );
-      // var oldName = _.path.name({ path : srcPath, withExtension : 1 });
+      // var oldName = self.path.name({ path : srcPath, withExtension : 1 });
       // if( self._cacheDir[ srcPath ] )
       // if( self._cacheDir[ srcPath ][ 0 ]  === oldName )
       // {
-      //   var newName = _.path.name({ path : dstPath, withExtension : 1 });
+      //   var newName = self.path.name({ path : dstPath, withExtension : 1 });
       //   self._cacheDir[ srcPath ][ 0 ] = newName;
       // }
       //
-      // var dir = _.path.dir( srcPath );
+      // var dir = self.path.dir( srcPath );
       // var dir = self._cacheDir[ dir ];
       // if( dir )
       // {
       //   var index = dir.indexOf( oldName );
       //   if( index >= 0  )
       //   dir.splice( index, 1 );
-      //   var fileName = _.path.name({ path : dstPath, withExtension : 1 });
+      //   var fileName = self.path.name({ path : dstPath, withExtension : 1 });
       //   dir.push( fileName );
       // }
       //
@@ -1017,7 +1017,7 @@ function fileCopyAct( o )
         self._recordUpdate( o.srcPath );
       }
 
-      var dstPath = _.path.resolve( o.dstPath );
+      var dstPath = self.path.resolve( o.dstPath );
       if( self._cacheRecord[ dstPath ] )
       delete self._cacheRecord[ dstPath ];
 
@@ -1215,7 +1215,7 @@ var Composes =
   cachingRecord : 1,
   updateOnRead : 0,
   watchPath : null,
-  watchOptions : Object.create( null )
+  watchOptions : _.define.own({}),
 }
 
 var Aggregates =
@@ -1235,7 +1235,7 @@ var Restricts =
 }
 
 // --
-// define class
+// declare
 // --
 
 var Extend =
